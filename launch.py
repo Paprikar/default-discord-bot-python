@@ -183,7 +183,7 @@ def get_nsfw_pics_path_list():
         os.path.join(NSFW_PICS_DIR, path) for path
         in os.listdir(NSFW_PICS_DIR)
         if (os.path.isfile(os.path.join(NSFW_PICS_DIR, path))
-            and os.path.splitext(path)[1] in ('.png', '.jpg', '.jpeg'))
+            and os.path.splitext(path)[1].lower() in ('.png', '.jpg', '.jpeg'))
     ]
     return pics_path_list
 
