@@ -119,7 +119,7 @@ async def on_message(message: discord.Message):
     if (message.channel.id == BOT_CHANNEL_ID
         and message.content.lower() == COMMAND_PREFIX + 'qsize'):
         qsize = len(get_nsfw_pics_path_list())
-        message.channel.send(f'NSFW pictures queue size: {qsize}')
+        await message.channel.send(f'NSFW pictures queue size: {qsize}')
 
     #  Messages from bot
     if message.author == client.user:
