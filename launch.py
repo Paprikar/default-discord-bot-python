@@ -107,15 +107,19 @@ async def on_message(message: discord.Message):
     await client.wait_until_ready()
 
     if (message.channel.id == BOT_CHANNEL_ID
-        and message.author.guild_permissions.administrator
-        and message.content == COMMAND_PREFIX + 'ping'):
+        and message.content.lower() == COMMAND_PREFIX + 'ping'):
         await message.channel.send('...pong')
 
     if (message.channel.id == BOT_CHANNEL_ID
         and message.author.guild_permissions.administrator
-        and message.content == COMMAND_PREFIX + 'shutdown'):
+        and message.content.lower() == COMMAND_PREFIX + 'shutdown'):
         await client.logout()
         logger.info('Shutdown.')
+
+    if (message.channel.id == BOT_CHANNEL_ID
+        and message.content.lower() == COMMAND_PREFIX + 'qsize'):
+        qsize = len(get_nsfw_pics_path_list())
+        message.channel.send(f'NSFW pictures queue size: {qsize}')
 
     #  Messages from bot
     if message.author == client.user:
@@ -159,15 +163,7 @@ def send_nsfw_pic_time_check():
 
 async def send_nsfw_pic():
     channel = client.get_channel(NSFW_CHANNEL_ID)
-    if not os.path.exists(NSFW_PICS_DIR):
-        return False
-
-    pics_path_list = [
-        os.path.join(NSFW_PICS_DIR, path) for path
-        in os.listdir(NSFW_PICS_DIR)
-        if (os.path.isfile(os.path.join(NSFW_PICS_DIR, path))
-            and os.path.splitext(path)[1] in ('.png', '.jpg', '.jpeg'))
-    ]
+    pics_path_list = get_nsfw_pics_path_list()
 
     if not pics_path_list:
         return False
@@ -178,6 +174,18 @@ async def send_nsfw_pic():
             file=discord.File(f, filename=os.path.basename(pic_path)))
     NSFW_MSG_IDS_TO_TRACK[message.id] = pic_path
     return True
+
+
+def get_nsfw_pics_path_list():
+    if not os.path.exists(NSFW_PICS_DIR):
+        return list()
+    pics_path_list = [
+        os.path.join(NSFW_PICS_DIR, path) for path
+        in os.listdir(NSFW_PICS_DIR)
+        if (os.path.isfile(os.path.join(NSFW_PICS_DIR, path))
+            and os.path.splitext(path)[1] in ('.png', '.jpg', '.jpeg'))
+    ]
+    return pics_path_list
 
 
 def select_pic(pics):
