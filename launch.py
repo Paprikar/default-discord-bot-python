@@ -1,14 +1,13 @@
-import os
-import time
-import json
-import glob
-import discord
-import logging
 import asyncio
+import json
+import logging
+import os
 from datetime import datetime
 
-from discord.ext import commands, tasks
-from dotenv import load_dotenv
+import discord
+
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 NoneType = type(None)
 
@@ -20,7 +19,7 @@ logger.addHandler(handler)
 
 
 with open('config.json') as f:
-    config = json.load(f) # type: dict
+    config = json.load(f)  # type: dict
 
 #  LOGGING_LEVEL
 LOGGING_LEVEL = config.get('logging_level')
@@ -36,8 +35,8 @@ elif LOGGING_LEVEL in (5, 'CRITICAL'):
     LOGGING_LEVEL = logging.CRITICAL
 elif LOGGING_LEVEL is not None:
     logger.warning('Parameter `logging_level` can only be one of the '
-                    'following values:\n[1, "DEBUG", 2, "INFO", 3, '
-                    '"WARNING", 4, "ERROR", 5, "CRITICAL"].')
+                   'following values:\n[1, "DEBUG", 2, "INFO", 3, '
+                   '"WARNING", 4, "ERROR", 5, "CRITICAL"].')
     LOGGING_LEVEL = None
 if LOGGING_LEVEL is None:
     logger.info('Parameter `logging_level` is set to "INFO" by default.')
@@ -78,9 +77,10 @@ if not (isinstance(NSFW_PICS_DIR, (str, NoneType))):
     NSFW_PICS_DIR = None
 if NSFW_PICS_DIR is not None and not os.path.exists(NSFW_PICS_DIR):
     logger.warning('Parameter `nsfw_pictures_directory` '
-                    'indicates a non-existent folder.')
+                   'indicates a non-existent folder.')
     NSFW_PICS_DIR = None
-NSFW_PICS_DIR = os.path.normcase(NSFW_PICS_DIR)
+else:
+    NSFW_PICS_DIR = os.path.normcase(NSFW_PICS_DIR)
 #  NSFW_PICS_SEND_TIME
 NSFW_PICS_SEND_TIME = config.get('nsfw_pictures_send_time')
 if not (isinstance(NSFW_PICS_SEND_TIME, (list, NoneType))):
@@ -175,7 +175,7 @@ async def send_nsfw_pic():
     pic_path = select_pic(pics_path_list)
     with open(pic_path, 'rb') as f:
         message = await channel.send(
-            file=discord.File(f,filename=os.path.basename(pic_path)))
+            file=discord.File(f, filename=os.path.basename(pic_path)))
     NSFW_MSG_IDS_TO_TRACK[message.id] = pic_path
     return True
 
