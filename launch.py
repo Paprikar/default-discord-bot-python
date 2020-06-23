@@ -1,7 +1,9 @@
-import asyncio
-import json
-import logging
 import os
+import sys
+import time
+import json
+import asyncio
+import logging
 from datetime import datetime
 
 import discord
@@ -11,16 +13,58 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 NoneType = type(None)
 
+
+class DateTimeFilter(logging.Filter):
+    def filter(self, record):
+        record.datetime = time.strftime('%Y-%m-%d-%H-%M-%S')
+        return True
+
 logger = logging.getLogger('launch.py')
 logger.setLevel(logging.INFO)
-handler = logging.StreamHandler()
-handler.setFormatter(logging.Formatter('%(levelname)s:%(name)s:%(message)s'))
-logger.addHandler(handler)
+logger.addFilter(DateTimeFilter())
+
+formatter = logging.Formatter(
+        '[%(datetime)s][%(threadName)s][%(name)s][%(levelname)s]: %(message)s')
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
+
+file_handler = logging.FileHandler('launch.log', delay=True)
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+
+def handle_unhandled_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    logger.critical('Unhandled exception:',
+                    exc_info=(exc_type, exc_value, exc_traceback))
+
+sys.excepthook = handle_unhandled_exception
 
 
 with open('config.json') as f:
     config = json.load(f)  # type: dict
 
+#  LOGGING_FILE
+LOGGING_FILE = config.get('logging_file')
+if not (isinstance(LOGGING_FILE, (str, NoneType))):
+    logger.warning('Parameter `logging_file` is not a string.')
+    LOGGING_FILE = None
+if (LOGGING_FILE is not None
+    and not os.path.exists(os.path.dirname(LOGGING_FILE))):
+    logger.warning('Parameter `logging_file` '
+                   'indicates to a file in a non-existent folder.')
+    LOGGING_FILE = None
+if LOGGING_FILE is None:
+    logger.info('Parameter `logging_file` is set to "./launch.log" by default.')
+    LOGGING_FILE = 'launch.log'
+else:
+    LOGGING_FILE = os.path.normcase(LOGGING_FILE)
+logger.removeHandler(file_handler)
+file_handler = logging.FileHandler(LOGGING_FILE)
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
 #  LOGGING_LEVEL
 LOGGING_LEVEL = config.get('logging_level')
 if LOGGING_LEVEL in (1, 'DEBUG'):
@@ -45,10 +89,10 @@ logger.setLevel(LOGGING_LEVEL)
 #  TOKEN
 TOKEN = config.get('token')
 if TOKEN is None:
-    logger.error('Parameter `token` is not specified.')
+    logger.critical('Parameter `token` is not specified.')
     exit()
 if not isinstance(TOKEN, str):
-    logger.error('Parameter `token` is not a string.')
+    logger.critical('Parameter `token` is not a string.')
     exit()
 #  COMMAND_PREFIX
 COMMAND_PREFIX = config.get('command_prefix')
@@ -59,10 +103,10 @@ if not isinstance(COMMAND_PREFIX, str):
 #  BOT_CHANNEL_ID
 BOT_CHANNEL_ID = config.get('bot_channel_id')
 if BOT_CHANNEL_ID is None:
-    logger.error('Parameter `bot_channel_id` is not specified.')
+    logger.critical('Parameter `bot_channel_id` is not specified.')
     exit()
 if not isinstance(BOT_CHANNEL_ID, int):
-    logger.error('Parameter `bot_channel_id` is not an integer.')
+    logger.critical('Parameter `bot_channel_id` is not an integer.')
     exit()
 #  NSFW_CHANNEL_ID
 NSFW_CHANNEL_ID = config.get('nsfw_channel_id')
@@ -79,7 +123,7 @@ if NSFW_PICS_DIR is not None and not os.path.exists(NSFW_PICS_DIR):
     logger.warning('Parameter `nsfw_pictures_directory` '
                    'indicates a non-existent folder.')
     NSFW_PICS_DIR = None
-else:
+if NSFW_PICS_DIR is not None:
     NSFW_PICS_DIR = os.path.normcase(NSFW_PICS_DIR)
 #  NSFW_PICS_SEND_TIME
 NSFW_PICS_SEND_TIME = config.get('nsfw_pictures_send_time')
