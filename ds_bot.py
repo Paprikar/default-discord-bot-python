@@ -80,6 +80,7 @@ class PicsManager():
             file = discord.File(pic_path, filename=os.path.basename(pic_path))
             await channel.send(file=file)
             pass_flag = True
+            self.logger.info(f'Sent a picture on the path: "{pic_path}".')
             file.close()
             try:
                 os.remove(pic_path)
