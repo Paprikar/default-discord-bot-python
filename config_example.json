@@ -1,0 +1,29 @@
+{
+    "token": "TOKEN",
+    "command_prefix": "!",
+    "bot_channel_id": 1234567890,
+    "pics_categories": {
+        "cats": {
+            "channel_id": 1234567890,
+            "pictures_directory": "./pics/cats",
+            "pictures_send_time": [
+                "16:00",
+                "17:00",
+                "18:00",
+                "19:00"
+            ]
+        },
+        "nsfw": {
+            "channel_id": 1234567890,
+            "pictures_directory": "./pics/nsfw",
+            "pictures_send_time": [
+                "16:00",
+                "17:00",
+                "18:00",
+                "19:00"
+            ]
+        }
+    },
+    "logging_level": "INFO",
+    "logging_file": "./launch.py.log"
+}
