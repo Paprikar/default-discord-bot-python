@@ -5,7 +5,7 @@
     "pics_categories": {
         "cats": {
             "channel_id": 1234567890,
-            "pictures_directory": "./categories/cats/pics",
+            "pictures_directory": "./pics/cats",
             "pictures_send_time": [
                 "16:00",
                 "17:00",
@@ -15,7 +15,7 @@
         },
         "nsfw": {
             "channel_id": 1234567890,
-            "pictures_directory": "./categories/nsfw/pics",
+            "pictures_directory": "./pics/nsfw",
             "pictures_send_time": [
                 "16:00",
                 "17:00",
@@ -25,5 +25,5 @@
         }
     },
     "logging_level": "INFO",
-    "logging_file": "./ds_bot.log"
+    "logging_file": "./launch.py.log"
 }
