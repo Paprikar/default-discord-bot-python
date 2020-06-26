@@ -10,17 +10,17 @@ from .utils import get_pics_path_list
 
 class PicsManager:
 
-    def __init__(self, client, category, logger):
-        self.client = client
-        self.logger = logger
+    def __init__(self, category_name, container):
+        self.container = container
+        category = container.pics_categories[category_name]
         self.channel_id = category['channel_id']
-        self.pictures_directory = category['pictures_directory']
-        self.pictures_send_time = category['pictures_send_time']
+        self.pics_directory = category['pictures_directory']
+        self.pics_send_time = category['pictures_send_time']
 
     async def run(self):
-        await self.client.wait_until_ready()
+        await self.container.client.wait_until_ready()
 
-        while not self.client.is_closed():
+        while not self.container.client.is_closed():
             (
                 permit,
                 send_cooldown,
@@ -36,14 +36,14 @@ class PicsManager:
     def _send_pic_time_check(self):
         #  Returns: permit, send_cooldown, resend_cooldown
         current_time = datetime.strftime(datetime.now(), '%H:%M')
-        if current_time in self.pictures_send_time:
+        if current_time in self.pics_send_time:
             return True, 60, 1
         else:
             return False, 60, 1
 
     async def _send_pic(self):
-        channel = self.client.get_channel(self.channel_id)
-        pics_path_list = get_pics_path_list(self.pictures_directory)
+        channel = self.container.client.get_channel(self.channel_id)
+        pics_path_list = get_pics_path_list(self.pics_directory)
 
         if not pics_path_list:
             return False
@@ -54,15 +54,16 @@ class PicsManager:
             file = discord.File(pic_path, filename=path.basename(pic_path))
             await channel.send(file=file)
             pass_flag = True
-            self.logger.info(f'Sent a picture on the path: "{pic_path}".')
+            self.container.logger.info(
+                f'Sent a picture on the path: "{pic_path}".')
             file.close()
             try:
                 os.remove(pic_path)
             except:
-                self.logger.error(
+                self.container.logger.error(
                     f'Can not remove "{pic_path}" file from disk.')
         except Exception as e:
-            self.logger.error(
+            self.container.logger.error(
                 f'Caught an exception of type `{type(e).__name__}`: {e}')
         return pass_flag
 

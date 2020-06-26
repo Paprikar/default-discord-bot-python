@@ -1,10 +1,8 @@
-from logging import Logger
-
-from discord import Client
+from .discord_bot_container import DiscordBotContainer
 
 
 class PicsManager:
 
-    def __init__(self, client: Client, category: dict, logger: Logger): pass
+    def __init__(self, category_name: str, container: DiscordBotContainer): ...
 
-    async def run(self): pass
+    async def run(self): ...

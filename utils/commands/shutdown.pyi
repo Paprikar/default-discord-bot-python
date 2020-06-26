@@ -1,7 +1,6 @@
-from logging import Logger
-
-from discord import Client
 from discord import Message
 
+from ..discord_bot_container import DiscordBotContainer
 
-async def message_shutdown(message: Message, client: Client, logger: Logger): pass
+
+async def message_shutdown(message: Message, args_str: str, container: DiscordBotContainer): ...

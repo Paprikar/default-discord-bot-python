@@ -1,4 +1,4 @@
-async def message_shutdown(message, client, logger):
+async def message_shutdown(message, args_str, container):
     if message.author.guild_permissions.administrator:
-        await client.logout()
-        logger.info('Shutdown.')
+        await container.client.logout()
+        container.logger.info('Shutdown.')

@@ -1,13 +1,12 @@
 import inspect
 
 from .commands.message_bot_channel import message_bot_channel
-from .discord_bot_attrs import DiscordBotAttrs
 
 
-class DiscordEventHandler(DiscordBotAttrs):
+class DiscordEventHandler:
 
-    def __init__(self, discord_bot):
-        self.fill_attrs(discord_bot, self)
+    def __init__(self, container):
+        self.container = container
 
         methods = inspect.getmembers(self, inspect.ismethod)
         events = (method[1] for method in methods
@@ -16,7 +15,7 @@ class DiscordEventHandler(DiscordBotAttrs):
             self.update_event(event)
 
     def update_event(self, event):
-        self.client.event(event)
+        self.container.client.event(event)
 
     async def on_connect(self):
         pass
@@ -25,12 +24,13 @@ class DiscordEventHandler(DiscordBotAttrs):
         pass
 
     async def on_ready(self):
-        guilds = self.client.guilds
+        guilds = self.container.client.guilds
         if guilds:
-            msg = f'{self.client.user} is connected to the following servers:'
+            msg = (f'{self.container.client.user} '
+                   'is connected to the following servers:')
             for guild in guilds:
                 msg += f'\n  {guild.name} (id: {guild.id})'
-            self.logger.info(msg)
+            self.container.logger.info(msg)
 
     async def on_shard_ready(self, shard_id):
         pass
@@ -51,14 +51,10 @@ class DiscordEventHandler(DiscordBotAttrs):
         pass
 
     async def on_message(self, message):
-        await self.client.wait_until_ready()
+        await self.container.client.wait_until_ready()
 
-        if message.channel.id == self.bot_channel_id:
-            await message_bot_channel(message,
-                                      self.client,
-                                      self.command_prefix,
-                                      self.pics_categories,
-                                      self.logger)
+        if message.channel.id == self.container.bot_channel_id:
+            await message_bot_channel(message, self.container)
 
     async def on_message_delete(self, message):
         pass

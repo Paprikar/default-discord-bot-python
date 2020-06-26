@@ -6,11 +6,12 @@ from utils import init_logger
 
 
 def run():
+    config_path = 'config.json'
     formatter = logging.Formatter(
         '[%(datetime)s][%(threadName)s][%(name)s]'
         '[%(levelname)s]: %(message)s')
     logger = init_logger(__file__, formatter)
-    bot = DiscordBot(logger, formatter)
+    bot = DiscordBot(config_path, logger, formatter)
     bot.run()
 
 

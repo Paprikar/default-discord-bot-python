@@ -1,11 +1,10 @@
 from typing import Coroutine
 
-from .discord_bot import DiscordBot
-from .discord_bot_attrs import DiscordBotAttrs
+from .discord_bot_container import DiscordBotContainer
 
 
-class DiscordEventHandler(DiscordBotAttrs):
+class DiscordEventHandler:
 
-    def __init__(self, discord_bot: DiscordBot): pass
+    def __init__(self, container: DiscordBotContainer): ...
 
-    def update_event(self, event: Coroutine): pass
+    def update_event(self, event: Coroutine): ...
