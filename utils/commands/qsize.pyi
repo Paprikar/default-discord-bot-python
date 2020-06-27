@@ -1,4 +1,6 @@
 from discord import Message
 
+from ..discord_bot_container import DiscordBotContainer
 
-async def message_qsize(message: Message, args_str: str, pics_categories: dict): pass
+
+async def message_qsize(message: Message, args_str: str, container: DiscordBotContainer): ...

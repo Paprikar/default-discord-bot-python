@@ -7,6 +7,14 @@ NoneType = type(None)
 
 
 def parse_config(config_path, logger, formatter):
+    if not isinstance(config_path, str):
+        logger.critical('Parameter `config_path` is not a string type.')
+        raise TypeError
+    if not path.isfile(config_path):
+        logger.critical(
+            'Parameter `config_path` must point to an existing file.')
+        raise ValueError
+
     with open(config_path) as f:
         config = json.load(f)  # type: dict
 
@@ -17,8 +25,8 @@ def parse_config(config_path, logger, formatter):
         logging_file = None
     if (logging_file is not None
         and not path.exists(path.dirname(logging_file))):
-        logger.error('Parameter `logging_file` indicates to a '
-                     'file in a non-existent folder.')
+        logger.error('Parameter `logging_file` points to a file '
+                     'in a non-existent folder.')
         logging_file = None
     if logging_file is None:
         logger.info('Parameter `logging_file` is set '
@@ -60,10 +68,10 @@ def parse_config(config_path, logger, formatter):
     token = config.get('token')
     if token is None:
         logger.critical('Parameter `token` is not specified.')
-        exit()
+        raise ValueError
     if not isinstance(token, str):
         logger.critical('Parameter `token` is not a string type.')
-        exit()
+        raise TypeError
     #  COMMAND_PREFIX
     command_prefix = config.get('command_prefix')
     if not isinstance(command_prefix, (str, NoneType)):
@@ -82,11 +90,11 @@ def parse_config(config_path, logger, formatter):
     if bot_channel_id is None:
         logger.critical(
             'Parameter `bot_channel_id` is not specified.')
-        exit()
+        raise ValueError
     if not isinstance(bot_channel_id, int):
         logger.critical(
             'Parameter `bot_channel_id` is not an integer type.')
-        exit()
+        raise TypeError
     #  PICS_CATEGORIES
     pics_categories = config.get('pics_categories')  # type: dict
     if not isinstance(pics_categories, (dict, NoneType)):
@@ -136,8 +144,7 @@ def _check_category(category, category_name, logger):
         return False
     if not path.exists(pictures_directory):
         logger.error(f'Value of `pics_categories/{category_name}/'
-                     'pictures_directory` indicates '
-                     'a non-existent folder.')
+                     'pictures_directory` should point to an existing folder.')
         return False
     category['pictures_directory'] = path.normcase(
         pictures_directory)

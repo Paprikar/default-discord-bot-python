@@ -1,11 +1,11 @@
 from logging import Formatter
 from logging import Logger
 
-from .discord_bot_attrs import DiscordBotAttrs
 
+class DiscordBot:
 
-class DiscordBot(DiscordBotAttrs):
+    def __init__(self, config_apth: str, logger: Logger, formatter: Formatter): ...
 
-    def __init__(self, logger: Logger, formatter: Formatter): pass
+    def run(self): ...
 
-    def run(self): pass
+    async def close(self): ...
