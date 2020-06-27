@@ -1,5 +1,6 @@
 from .ping import message_ping
 from .qsize import message_qsize
+from .restart import message_restart
 from .shutdown import message_shutdown
 
 
@@ -13,5 +14,7 @@ async def message_bot_channel(message, container):
             await message_ping(message, args_str, container)
         elif command == 'qsize':
             await message_qsize(message, args_str, container)
+        elif command == 'restart':
+            await message_restart(message, args_str, container)
         elif command == 'shutdown':
             await message_shutdown(message, args_str, container)
