@@ -3,7 +3,6 @@ import sys
 import discord
 
 from .config import parse_config
-from .discord_bot_container import DiscordBotContainer
 from .discord_event_handler import DiscordEventHandler
 from .pics_manager import PicsManager
 
@@ -20,48 +19,46 @@ class DiscordBot:
         self._init()
 
     def _init(self):
-        self.container = DiscordBotContainer()
-        self.container.client = discord.Client()
-        self.container.logger = self.logger
-        self.container.discord_bot = self
+        self.client = discord.Client()
         (
-            self.container.token,
-            self.container.command_prefix,
-            self.container.bot_channel_id,
-            self.container.pics_categories,
+            self.token,
+            self.command_prefix,
+            self.bot_channel_id,
+            self.pics_categories,
         ) = parse_config(self.config_path, self.logger, self.formatter)
 
-        self.event_handler = DiscordEventHandler(self.container)
+        self.shutdown_allowed = False
+        self.event_handler = DiscordEventHandler(self)
 
     def _handle_unhandled_exception(self, exc_type, exc_value, exc_traceback):
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
             return
-        self.container.logger.critical(
+        self.logger.critical(
             'Unhandled exception: ',
             exc_info=(exc_type, exc_value, exc_traceback))
 
     async def _runner(self):
         try:
-            await self.container.client.start(self.container.token)
+            await self.client.start(self.token)
         finally:
             await self.close()
 
     def _stop_loop_on_completion(self, f):
-        self.container.client.loop.stop()
+        self.client.loop.stop()
 
     def _shutdown(self, msg, task_stop):
         task_stop.remove_done_callback(self._stop_loop_on_completion)
-        self.container.logger.info(msg)
-        self.container.client.loop.run_until_complete(
-            self.container.client.close())
+        self.logger.info(msg)
+        self.client.loop.run_until_complete(
+            self.client.close())
 
     def run(self):
-        loop = self.container.client.loop
+        loop = self.client.loop
         while True:
-            if self.container.pics_categories:
-                for category_name in self.container.pics_categories:
-                    manager = PicsManager(category_name, self.container)
+            if self.pics_categories:
+                for category_name in self.pics_categories:
+                    manager = PicsManager(category_name, self)
                     loop.create_task(manager.run())
 
             task_stop = loop.create_task(self._runner())
@@ -73,7 +70,7 @@ class DiscordBot:
                 self._shutdown('Shutdown.', task_stop)
                 break
             else:
-                if self.container.shutdown_allowed:
+                if self.shutdown_allowed:
                     self._shutdown('Shutdown.', task_stop)
                     break
                 else:
@@ -81,4 +78,4 @@ class DiscordBot:
                     self._init()
 
     async def close(self):
-        await self.container.client.close()
+        await self.client.close()

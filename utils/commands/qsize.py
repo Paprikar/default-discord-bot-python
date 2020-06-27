@@ -3,8 +3,8 @@ import discord
 from ..utils import get_pics_path_list
 
 
-async def message_qsize(message, args_str, container):
-    pics_categories = container.pics_categories
+async def message_qsize(message, args_str, bot):
+    pics_categories = bot.pics_categories
     category_names = set()
     args = args_str.split()
     if not args or 'all' in args:

@@ -1,4 +1,4 @@
-async def message_shutdown(message, args_str, container):
+async def message_shutdown(message, args_str, bot):
     if message.author.guild_permissions.administrator:
-        container.shutdown_allowed = True
-        await container.discord_bot.close()
+        bot.shutdown_allowed = True
+        await bot.close()

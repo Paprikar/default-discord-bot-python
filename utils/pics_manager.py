@@ -10,17 +10,18 @@ from .utils import get_pics_path_list
 
 class PicsManager:
 
-    def __init__(self, category_name, container):
-        self.container = container
-        category = container.pics_categories[category_name]
+    def __init__(self, category_name, bot):
+        self.bot = bot
+
+        category = bot.pics_categories[category_name]
         self.channel_id = category['channel_id']
         self.pics_directory = category['pictures_directory']
         self.pics_send_time = category['pictures_send_time']
 
     async def run(self):
-        await self.container.client.wait_until_ready()
+        await self.bot.client.wait_until_ready()
 
-        while not self.container.client.is_closed():
+        while not self.bot.client.is_closed():
             (
                 permit,
                 send_cooldown,
@@ -42,7 +43,7 @@ class PicsManager:
             return False, 60, 1
 
     async def _send_pic(self):
-        channel = self.container.client.get_channel(self.channel_id)
+        channel = self.bot.client.get_channel(self.channel_id)
         pics_path_list = get_pics_path_list(self.pics_directory)
 
         if not pics_path_list:
@@ -54,16 +55,16 @@ class PicsManager:
             file = discord.File(pic_path, filename=path.basename(pic_path))
             await channel.send(file=file)
             pass_flag = True
-            self.container.logger.info(
+            self.bot.logger.info(
                 f'Sent a picture on the path: "{pic_path}".')
             file.close()
             try:
                 os.remove(pic_path)
             except:
-                self.container.logger.error(
+                self.bot.logger.error(
                     f'Can not remove "{pic_path}" file from disk.')
         except Exception as e:
-            self.container.logger.error(
+            self.bot.logger.error(
                 f'Caught an exception of type `{type(e).__name__}`: {e}')
         return pass_flag
 

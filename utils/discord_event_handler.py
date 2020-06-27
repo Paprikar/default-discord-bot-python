@@ -5,8 +5,8 @@ from .commands.message_bot_channel import message_bot_channel
 
 class DiscordEventHandler:
 
-    def __init__(self, container):
-        self.container = container
+    def __init__(self, bot):
+        self.bot = bot
 
         methods = inspect.getmembers(self, inspect.ismethod)
         events = (method[1] for method in methods
@@ -15,7 +15,7 @@ class DiscordEventHandler:
             self.update_event(event)
 
     def update_event(self, event):
-        self.container.client.event(event)
+        self.bot.client.event(event)
 
     async def on_connect(self):
         pass
@@ -24,13 +24,13 @@ class DiscordEventHandler:
         pass
 
     async def on_ready(self):
-        guilds = self.container.client.guilds
+        guilds = self.bot.client.guilds
         if guilds:
-            msg = (f'{self.container.client.user} '
+            msg = (f'{self.bot.client.user} '
                    'is connected to the following servers:')
             for guild in guilds:
                 msg += f'\n  {guild.name} (id: {guild.id})'
-            self.container.logger.info(msg)
+            self.bot.logger.info(msg)
 
     async def on_shard_ready(self, shard_id):
         pass
@@ -51,10 +51,10 @@ class DiscordEventHandler:
         pass
 
     async def on_message(self, message):
-        await self.container.client.wait_until_ready()
+        await self.bot.client.wait_until_ready()
 
-        if message.channel.id == self.container.bot_channel_id:
-            await message_bot_channel(message, self.container)
+        if message.channel.id == self.bot.bot_channel_id:
+            await message_bot_channel(message, self.bot)
 
     async def on_message_delete(self, message):
         pass
