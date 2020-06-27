@@ -3,35 +3,34 @@ import logging
 from os import path
 
 
-NoneType = type(None)
-
-
 def parse_config(config_path, logger, formatter):
     if not isinstance(config_path, str):
-        logger.critical('Parameter `config_path` is not a string type.')
-        raise TypeError
+        msg = 'Parameter `config_path` is not a string type.'
+        logger.critical(msg)
+        raise TypeError(msg)
     if not path.isfile(config_path):
-        logger.critical(
-            'Parameter `config_path` must point to an existing file.')
-        raise ValueError
+        msg = 'Parameter `config_path` must point to an existing file.'
+        logger.critical(msg)
+        raise ValueError(msg)
 
     with open(config_path) as f:
         config = json.load(f)  # type: dict
 
     #  LOGGING_FILE
     logging_file = config.get('logging_file')
-    if not (isinstance(logging_file, (str, NoneType))):
+    if not (logging_file is None
+            or isinstance(logging_file, str)):
         logger.error('Parameter `logging_file` is not a string type.')
         logging_file = None
-    if (logging_file is not None
-        and not path.exists(path.dirname(logging_file))):
+    if not (logging_file is None
+            or path.exists(path.dirname(logging_file))):
         logger.error('Parameter `logging_file` points to a file '
                      'in a non-existent folder.')
         logging_file = None
     if logging_file is None:
         logger.info('Parameter `logging_file` is set '
-                    'to "./launch.log" by default.')
-        logging_file = 'launch.log'
+                    'to "./launch.py.log" by default.')
+        logging_file = 'launch.py.log'
     else:
         logging_file = path.normcase(logging_file)
     for handler in logger.handlers:
@@ -67,18 +66,22 @@ def parse_config(config_path, logger, formatter):
     #  TOKEN
     token = config.get('token')
     if token is None:
-        logger.critical('Parameter `token` is not specified.')
-        raise ValueError
+        msg = 'Parameter `token` is not specified.'
+        logger.critical(msg)
+        raise ValueError(msg)
     if not isinstance(token, str):
-        logger.critical('Parameter `token` is not a string type.')
-        raise TypeError
+        msg = 'Parameter `token` is not a string type.'
+        logger.critical(msg)
+        raise TypeError(msg)
     #  COMMAND_PREFIX
     command_prefix = config.get('command_prefix')
-    if not isinstance(command_prefix, (str, NoneType)):
+    if not (command_prefix is None
+            or isinstance(command_prefix, str)):
         logger.error(
             'Parameter `command_prefix` is not a string type.')
         command_prefix = None
-    if len(command_prefix) != 1:
+    if not (command_prefix is None
+            or len(command_prefix) == 1):
         logger.error(
             'Parameter `command_prefix` can only be one symbol.')
         command_prefix = None
@@ -88,16 +91,17 @@ def parse_config(config_path, logger, formatter):
     #  BOT_CHANNEL_ID
     bot_channel_id = config.get('bot_channel_id')
     if bot_channel_id is None:
-        logger.critical(
-            'Parameter `bot_channel_id` is not specified.')
-        raise ValueError
+        msg = 'Parameter `bot_channel_id` is not specified.'
+        logger.critical(msg)
+        raise ValueError(msg)
     if not isinstance(bot_channel_id, int):
-        logger.critical(
-            'Parameter `bot_channel_id` is not an integer type.')
-        raise TypeError
+        msg = 'Parameter `bot_channel_id` is not an integer type.'
+        logger.critical(msg)
+        raise TypeError(msg)
     #  PICS_CATEGORIES
     pics_categories = config.get('pics_categories')  # type: dict
-    if not isinstance(pics_categories, (dict, NoneType)):
+    if not (pics_categories is None
+            or isinstance(pics_categories, dict)):
         logger.error(
             'Parameter `pics_categories` is not a dict type.')
         pics_categories = None
