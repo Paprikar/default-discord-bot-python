@@ -1,9 +1,10 @@
-from .config import parse_config as parse_config
-from .discord_bot import DiscordBot as DiscordBot
-from .discord_event_handler import DiscordEventHandler as DiscordEventHandler
-from .logger import init_logger as init_logger
-from .pics_manager import PicsManager as PicsManager
-from .utils import get_pics_path_list as get_pics_path_list
+from .config import parse_config
+from .discord_bot import DiscordBot
+from .discord_event_handler import DiscordEventHandler
+from .logger import init_logger
+from .pics_sending_manager import PicsSendingManager
+from .pics_suggestion_manager import PicsSuggestionManager
+from .utils import get_pics_path_list
 
 
 __all__ = [
@@ -11,6 +12,7 @@ __all__ = [
     'DiscordBot',
     'DiscordEventHandler',
     'init_logger',
-    'PicsManager',
+    'PicsSendingManager',
+    'PicsSuggestionManager',
     'get_pics_path_list',
 ]

@@ -5,34 +5,54 @@ from os import path
 
 import discord
 
+from .manager import Manager
 from .utils import get_pics_path_list
 
 
-class PicsManager:
+class PicsSendingManager(Manager):
 
     def __init__(self, category_name, bot):
         self.bot = bot
+        self.closable = asyncio.Event()
+        self.closable.set()
+        self.to_close = asyncio.Lock()
 
         category = bot.pics_categories[category_name]
         self.channel_id = category['channel_id']
         self.pics_directory = category['pictures_directory']
         self.pics_send_time = category['pictures_send_time']
 
-    async def run(self):
+    def run(self):
+        self.task = self.bot.loop.create_task(self.start())
+
+    async def start(self):
         await self.bot.client.wait_until_ready()
 
-        while not self.bot.client.is_closed():
-            (
-                permit,
-                send_cooldown,
-                resend_cooldown,
-            ) = self._send_pic_time_check()
-            if permit:
-                is_sended = await self._send_pic()
-                sleep_time = send_cooldown if is_sended else resend_cooldown
-            else:
-                sleep_time = resend_cooldown
-            await asyncio.sleep(sleep_time)
+        try:
+            while not (self.bot.client.is_closed() or self.to_close.locked()):
+                (
+                    permit,
+                    send_cooldown,
+                    resend_cooldown,
+                ) = self._send_pic_time_check()
+
+                if permit:
+                    self.closable.clear()
+                    is_sended = await self._send_pic()
+                    self.closable.set()
+                    sleep_time = (send_cooldown if is_sended
+                                  else resend_cooldown)
+                else:
+                    sleep_time = resend_cooldown
+
+                await asyncio.sleep(sleep_time)
+        except asyncio.CancelledError:
+            pass
+
+    async def close(self):
+        await self.to_close.acquire()
+        await self.closable.wait()
+        self.task.cancel()
 
     def _send_pic_time_check(self):
         #  Returns: permit, send_cooldown, resend_cooldown

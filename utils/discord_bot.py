@@ -1,10 +1,11 @@
+import asyncio
 import sys
 
 import discord
 
 from .config import parse_config
 from .discord_event_handler import DiscordEventHandler
-from .pics_manager import PicsManager
+from .pics_sending_manager import PicsSendingManager
 
 
 class DiscordBot:
@@ -19,7 +20,8 @@ class DiscordBot:
         self._init()
 
     def _init(self):
-        self.client = discord.Client()
+        self.loop = asyncio.get_event_loop()
+        self.client = discord.Client(loop=self.loop)
         (
             self.token,
             self.command_prefix,
@@ -29,6 +31,7 @@ class DiscordBot:
 
         self.shutdown_allowed = False
         self.event_handler = DiscordEventHandler(self)
+        self.managers = []
 
     def _handle_unhandled_exception(self, exc_type, exc_value, exc_traceback):
         if issubclass(exc_type, KeyboardInterrupt):
@@ -38,44 +41,38 @@ class DiscordBot:
             'Unhandled exception: ',
             exc_info=(exc_type, exc_value, exc_traceback))
 
-    async def _runner(self):
-        try:
-            await self.client.start(self.token)
-        finally:
-            await self.close()
-
-    def _stop_loop_on_completion(self, f):
-        self.client.loop.stop()
-
-    def _shutdown(self, msg, task_stop):
-        task_stop.remove_done_callback(self._stop_loop_on_completion)
-        self.logger.info(msg)
-        self.client.loop.run_until_complete(
-            self.client.close())
-
     def run(self):
-        loop = self.client.loop
         while True:
             if self.pics_categories:
                 for category_name in self.pics_categories:
-                    manager = PicsManager(category_name, self)
-                    loop.create_task(manager.run())
+                    manager = PicsSendingManager(category_name, self)
+                    self.managers.append(manager)
+                    manager.run()
 
-            task_stop = loop.create_task(self._runner())
-            task_stop.add_done_callback(self._stop_loop_on_completion)
+            self.loop.create_task(self.client.start(self.token))
 
             try:
-                loop.run_forever()
+                self.loop.run_forever()
             except KeyboardInterrupt:
-                self._shutdown('Shutdown.', task_stop)
+                self.shutdown('Shutting down.')
                 break
             else:
                 if self.shutdown_allowed:
-                    self._shutdown('Shutdown.', task_stop)
                     break
                 else:
-                    self._shutdown('Restart...', task_stop)
                     self._init()
 
+    def shutdown(self, msg):
+        self.logger.info(msg)
+        self.loop.create_task(self.close())
+        self.loop.run_forever()
+        self.loop.close()
+
     async def close(self):
+        for manager in self.managers:
+            await manager.close()
         await self.client.close()
+        tasks = [t for t in asyncio.all_tasks()
+                 if t is not asyncio.current_task()]
+        await asyncio.gather(*tasks)
+        self.loop.stop()
