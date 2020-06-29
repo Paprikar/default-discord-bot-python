@@ -2,8 +2,8 @@ import argparse
 import logging
 import os
 
-from utils import DiscordBot
-from utils import init_logger
+from bot import DiscordBot
+from bot.utils import init_logger
 
 
 def run(config_path, no_chdir=False):

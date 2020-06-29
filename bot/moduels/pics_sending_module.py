@@ -5,11 +5,11 @@ from os import path
 
 import discord
 
-from .manager import Manager
-from .utils import get_pics_path_list
+from .module import Module
+from ..utils.utils import get_pics_path_list
 
 
-class PicsSendingManager(Manager):
+class PicsSendingModule(Module):
 
     def __init__(self, category_name, bot):
         self.bot = bot

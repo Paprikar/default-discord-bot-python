@@ -1,4 +1,4 @@
-class Manager:
+class Module:
 
     def run(self):
         raise NotImplementedError

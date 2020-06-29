@@ -6,8 +6,8 @@ from typing import Type
 
 from discord import Client
 
-from .discord_event_handler import DiscordEventHandler
-from .manager import Manager
+from .bot_event_handler import DiscordBotEventHandler
+from .moduels import Module
 
 
 class DiscordBot:
@@ -21,8 +21,8 @@ class DiscordBot:
     bot_channel_id: int
     pics_categories: dict
     shutdown_allowed: bool = False
-    event_handler: DiscordEventHandler
-    managers: List[Type[Manager]]
+    event_handler: DiscordBotEventHandler
+    modules: List[Type[Module]]
 
     def __init__(self, config_path: str, logger: Logger, formatter: Formatter): ...
 

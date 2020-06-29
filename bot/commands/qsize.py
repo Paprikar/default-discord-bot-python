@@ -1,6 +1,6 @@
 import discord
 
-from ..utils import get_pics_path_list
+from ..utils.utils import get_pics_path_list
 
 
 async def message_qsize(message, args_str, bot):

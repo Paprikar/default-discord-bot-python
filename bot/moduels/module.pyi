@@ -2,10 +2,10 @@ from asyncio import Event
 from asyncio import Lock
 from asyncio import Task
 
-from .discord_bot import DiscordBot
+from ..bot import DiscordBot
 
 
-class Manager:
+class Module:
     bot: DiscordBot
     task: Task
     closable: Event

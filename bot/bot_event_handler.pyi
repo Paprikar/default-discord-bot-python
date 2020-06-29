@@ -1,9 +1,9 @@
 from typing import Coroutine
 
-from .discord_bot import DiscordBot
+from .bot import DiscordBot
 
 
-class DiscordEventHandler:
+class DiscordBotEventHandler:
     bot: DiscordBot
 
     def __init__(self, bot: DiscordBot): ...

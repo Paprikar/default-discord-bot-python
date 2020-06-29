@@ -1,9 +1,9 @@
 from aiohttp import web
 
-from .manager import Manager
+from .module import Module
 
 
-class PicsSuggestionManager(Manager):
+class PicsSuggestionModule(Module):
 
     def __init__(self, category_name, bot):
         self.bot = bot

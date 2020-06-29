@@ -1,9 +1,9 @@
 import inspect
 
-from .commands.message_bot_channel import message_bot_channel
+from .commands import message_bot_channel
 
 
-class DiscordEventHandler:
+class DiscordBotEventHandler:
 
     def __init__(self, bot):
         self.bot = bot

@@ -3,9 +3,9 @@ import sys
 
 import discord
 
-from .config import parse_config
-from .discord_event_handler import DiscordEventHandler
-from .pics_sending_manager import PicsSendingManager
+from .bot_event_handler import DiscordBotEventHandler
+from .moduels import PicsSendingModule
+from .utils import parse_config
 
 
 class DiscordBot:
@@ -30,8 +30,8 @@ class DiscordBot:
         ) = parse_config(self.config_path, self.logger, self.formatter)
 
         self.shutdown_allowed = False
-        self.event_handler = DiscordEventHandler(self)
-        self.managers = []
+        self.event_handler = DiscordBotEventHandler(self)
+        self.modules = []
 
     def _handle_unhandled_exception(self, exc_type, exc_value, exc_traceback):
         if issubclass(exc_type, KeyboardInterrupt):
@@ -45,15 +45,15 @@ class DiscordBot:
         while True:
             if self.pics_categories:
                 for category_name in self.pics_categories:
-                    manager = PicsSendingManager(category_name, self)
-                    self.managers.append(manager)
-                    manager.run()
+                    module = PicsSendingModule(category_name, self)
+                    self.modules.append(module)
+                    module.run()
 
             self.loop.create_task(self.client.start(self.token))
 
             try:
                 self.loop.run_forever()
-            except KeyboardInterrupt:
+            except (SystemExit, KeyboardInterrupt):
                 self.shutdown('Shutting down.')
                 break
             else:
@@ -69,8 +69,8 @@ class DiscordBot:
         self.loop.close()
 
     async def close(self):
-        for manager in self.managers:
-            await manager.close()
+        for module in self.modules:
+            await module.close()
         await self.client.close()
         tasks = [t for t in asyncio.all_tasks()
                  if t is not asyncio.current_task()]
