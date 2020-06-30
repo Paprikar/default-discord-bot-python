@@ -1,10 +1,10 @@
 import discord
 
-from ..utils import get_pics_path_list
+from ..utils.utils import get_pics_path_list
 
 
-async def message_qsize(message, args_str, container):
-    pics_categories = container.pics_categories
+async def message_qsize(message, args_str, bot):
+    pics_categories = bot.pics_categories
     category_names = set()
     args = args_str.split()
     if not args or 'all' in args:
@@ -19,7 +19,7 @@ async def message_qsize(message, args_str, container):
     desc = ''
     embed = discord.Embed()
     for category_name in category_names:
-        path = pics_categories[category_name]['pictures_directory']
+        path = pics_categories[category_name]['directory']
         qsize = len(get_pics_path_list(path))
         desc += f'Queue size for `{category_name}` pictures: {qsize}\n'
     embed.description = desc.rstrip()

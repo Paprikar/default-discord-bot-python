@@ -4,9 +4,12 @@
     "bot_channel_id": 1234567890,
     "pics_categories": {
         "cats": {
-            "channel_id": 1234567890,
-            "pictures_directory": "./pics/cats",
-            "pictures_send_time": [
+            "send_channel_id": 1234567890,
+            "suggestion_channel_id": 1234567890,
+            "suggestion_positive": "U+2705",
+            "suggestion_negative": "U+274E",
+            "directory": "./pics/cats",
+            "send_time": [
                 "16:00",
                 "17:00",
                 "18:00",
@@ -14,9 +17,12 @@
             ]
         },
         "nsfw": {
-            "channel_id": 1234567890,
-            "pictures_directory": "./pics/nsfw",
-            "pictures_send_time": [
+            "send_channel_id": 1234567890,
+            "suggestion_channel_id": 1234567890,
+            "suggestion_positive": "U+2705",
+            "suggestion_negative": "U+274E",
+            "directory": "./pics/nsfw",
+            "send_time": [
                 "16:00",
                 "17:00",
                 "18:00",

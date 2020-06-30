@@ -1,4 +1,4 @@
-async def message_ping(message, args_str, container):
+async def message_ping(message, args_str, bot):
     if args_str:
         #  TODO Ping a user
         pass
