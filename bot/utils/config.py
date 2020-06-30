@@ -55,7 +55,7 @@ def parse_config(config_path, logger, formatter):
     elif logging_level is not None:
         logger.error(
             'Parameter `logging_level` can only be one of the '
-            'following values:\n[1, "DEBUG", 2, "INFO", '
+            'following values: [1, "DEBUG", 2, "INFO", '
             '3, "WARNING", 4, "ERROR", 5, "CRITICAL"].')
         logging_level = None
     if logging_level is None:
@@ -88,6 +88,7 @@ def parse_config(config_path, logger, formatter):
     if command_prefix is None:
         logger.info(
             'Parameter `command_prefix` is set to "!" by default.')
+        command_prefix = '!'
     #  BOT_CHANNEL_ID
     bot_channel_id = config.get('bot_channel_id')
     if bot_channel_id is None:
@@ -127,36 +128,92 @@ def _check_category(category, category_name, logger):
         logger.error(f'Value of `pics_categories/{category_name}`'
                      'is not a dict type.')
         return False
-    if not (category.keys()
-            >= {'channel_id', 'pictures_directory', 'pictures_send_time'}):
+    if not category.keys() >= {'send_channel_id', 'suggestion_channel_id',
+                               'directory', 'send_time'}:
         logger.error(
             f'Value of `pics_categories/{category_name} must contain '
-            'the following keys:\n'
-            '["channel_id", "pictures_directory", "pictures_send_time"].')
+            'the following keys: ["send_channel_id", "suggestion_channel_id", '
+            '"directory", "send_time"].')
         return False
-    #  channel_id
-    channel_id = category['channel_id']
+    #  send_channel_id
+    channel_id = category['send_channel_id']
     if not isinstance(channel_id, int):
         logger.error(f'Value of `pics_categories/{category_name}/'
-                     'channel_id` is not an integer type.')
+                     'send_channel_id` is not an integer type.')
         return False
-    #  pictures_directory
-    pictures_directory = category['pictures_directory']
-    if not isinstance(pictures_directory, str):
+    #  suggestion_channel_id
+    channel_id = category['suggestion_channel_id']
+    if not isinstance(channel_id, int):
         logger.error(f'Value of `pics_categories/{category_name}/'
-                     'pictures_directory` is not a string type.')
+                     'suggestion_channel_id` is not an integer type.')
         return False
-    if not path.exists(pictures_directory):
+    #  suggestion_positive
+    emoji = category.get('suggestion_positive', None)
+    if not (emoji is None or isinstance(emoji, str)):
         logger.error(f'Value of `pics_categories/{category_name}/'
-                     'pictures_directory` should point to an existing folder.')
+                     'suggestion_positive` is not a string type.')
+        emoji = None
+    if emoji is not None:
+        try:
+            emoji = chr(int(emoji.lstrip("U+").zfill(8), 16))
+        except ValueError:
+            logger.error(
+                f'Value of `pics_categories/{category_name}/'
+                'suggestion_positive` must point to a Unicode character.')
+            emoji = None
+    if not (emoji is None or len(emoji) == 1):
+        logger.error(f'Value of `pics_categories/{category_name}/'
+                     'suggestion_positive` can only be one symbol '
+                     'after conversion to Unicode.')
+        emoji = None
+    if emoji is None:
+        logger.info(f'Value of `pics_categories/{category_name}/'
+                    'suggestion_positive` is set to " ✅ " by default.')
+        category['suggestion_positive'] = '✅'
+    else:
+        category['suggestion_positive'] = emoji
+    #  suggestion_negative
+    emoji = category.get('suggestion_negative', None)
+    if not (emoji is None or isinstance(emoji, str)):
+        logger.error(f'Value of `pics_categories/{category_name}/'
+                     'suggestion_negative` is not a string type.')
+        emoji = None
+    if emoji is not None:
+        try:
+            emoji = chr(int(emoji.lstrip("U+").zfill(8), 16))
+        except ValueError:
+            logger.error(
+                f'Value of `pics_categories/{category_name}/'
+                'suggestion_negative` must point to a Unicode character.')
+            emoji = None
+    if not (emoji is None or len(emoji) == 1):
+        logger.error(f'Value of `pics_categories/{category_name}/'
+                     'suggestion_negative` can only be one symbol '
+                     'after conversion to Unicode.')
+        emoji = None
+    if emoji is None:
+        logger.info(f'Value of `pics_categories/{category_name}/'
+                    'suggestion_negative` is set to " ❎ " by default.')
+        category['suggestion_negative'] = '❎'
+    else:
+        category['suggestion_negative'] = emoji
+    #  directory
+    directory = category['directory']
+    if not isinstance(directory, str):
+        logger.error(f'Value of `pics_categories/{category_name}/'
+                     'directory` is not a string type.')
         return False
-    category['pictures_directory'] = path.normcase(
-        pictures_directory)
-    #  pictures_send_time
-    pictures_send_time = category['pictures_send_time']
-    if not isinstance(pictures_send_time, list):
+    if not path.exists(directory):
         logger.error(f'Value of `pics_categories/{category_name}/'
-                     'pictures_send_time` is not a list type.')
+                     'directory` should point to an existing folder.')
+        return False
+    category['directory'] = path.normcase(
+        directory)
+    #  send_time
+    send_time = category['send_time']
+    if not isinstance(send_time, list):
+        logger.error(f'Value of `pics_categories/{category_name}/'
+                     'send_time` is not a list type.')
         return False
 
     return True

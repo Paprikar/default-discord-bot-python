@@ -5,6 +5,7 @@ import discord
 
 from .bot_event_handler import DiscordBotEventHandler
 from .moduels import PicsSendingModule
+from .moduels import PicsSuggestionModule
 from .utils import parse_config
 
 
@@ -17,7 +18,10 @@ class DiscordBot:
 
         sys.excepthook = self._handle_unhandled_exception
 
+        self.pics_suggestion_module = None
+
         self._init()
+
 
     def _init(self):
         self.loop = asyncio.get_event_loop()
@@ -33,6 +37,7 @@ class DiscordBot:
         self.event_handler = DiscordBotEventHandler(self)
         self.modules = []
 
+
     def _handle_unhandled_exception(self, exc_type, exc_value, exc_traceback):
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
@@ -41,13 +46,18 @@ class DiscordBot:
             'Unhandled exception: ',
             exc_info=(exc_type, exc_value, exc_traceback))
 
+
     def run(self):
         while True:
             if self.pics_categories:
                 for category_name in self.pics_categories:
-                    module = PicsSendingModule(category_name, self)
+                    module = PicsSendingModule(self, category_name)
                     self.modules.append(module)
                     module.run()
+
+                module = PicsSuggestionModule(self)
+                self.pics_suggestion_module = module
+                module.run()
 
             self.loop.create_task(self.client.start(self.token))
 
@@ -62,15 +72,18 @@ class DiscordBot:
                 else:
                     self._init()
 
+
     def shutdown(self, msg):
         self.logger.info(msg)
         self.loop.create_task(self.close())
         self.loop.run_forever()
         self.loop.close()
 
+
     async def close(self):
         for module in self.modules:
             await module.close()
+        await self.pics_suggestion_module.close()
         await self.client.close()
         tasks = [t for t in asyncio.all_tasks()
                  if t is not asyncio.current_task()]

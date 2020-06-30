@@ -11,19 +11,21 @@ from ..utils.utils import get_pics_path_list
 
 class PicsSendingModule(Module):
 
-    def __init__(self, category_name, bot):
+    def __init__(self, bot, category_name):
         self.bot = bot
         self.closable = asyncio.Event()
         self.closable.set()
         self.to_close = asyncio.Lock()
 
         category = bot.pics_categories[category_name]
-        self.channel_id = category['channel_id']
-        self.pics_directory = category['pictures_directory']
-        self.pics_send_time = category['pictures_send_time']
+        self.channel_id = category['send_channel_id']
+        self.directory = category['directory']
+        self.send_time = category['send_time']
+
 
     def run(self):
         self.task = self.bot.loop.create_task(self.start())
+
 
     async def start(self):
         await self.bot.client.wait_until_ready()
@@ -34,7 +36,7 @@ class PicsSendingModule(Module):
                     permit,
                     send_cooldown,
                     resend_cooldown,
-                ) = self._send_pic_time_check()
+                ) = self._time_check()
 
                 if permit:
                     self.closable.clear()
@@ -49,22 +51,25 @@ class PicsSendingModule(Module):
         except asyncio.CancelledError:
             pass
 
+
     async def close(self):
         await self.to_close.acquire()
         await self.closable.wait()
         self.task.cancel()
 
-    def _send_pic_time_check(self):
+
+    def _time_check(self):
         #  Returns: permit, send_cooldown, resend_cooldown
         current_time = datetime.strftime(datetime.now(), '%H:%M')
-        if current_time in self.pics_send_time:
+        if current_time in self.send_time:
             return True, 60, 1
         else:
             return False, 60, 1
 
+
     async def _send_pic(self):
         channel = self.bot.client.get_channel(self.channel_id)
-        pics_path_list = get_pics_path_list(self.pics_directory)
+        pics_path_list = get_pics_path_list(self.directory)
 
         if not pics_path_list:
             return False
@@ -85,8 +90,10 @@ class PicsSendingModule(Module):
                     f'Can not remove "{pic_path}" file from disk.')
         except Exception as e:
             self.bot.logger.error(
-                f'Caught an exception of type `{type(e).__name__}`: {e}')
+                f'Caught an exception of type `{type(e).__name__}` '
+                f'in `PicsSendingModule._send_pic`: {e}')
         return pass_flag
+
 
     @staticmethod
     def _select_pic(pics):

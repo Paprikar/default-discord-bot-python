@@ -8,6 +8,7 @@ from discord import Client
 
 from .bot_event_handler import DiscordBotEventHandler
 from .moduels import Module
+from .moduels import PicsSuggestionModule
 
 
 class DiscordBot:
@@ -23,6 +24,7 @@ class DiscordBot:
     shutdown_allowed: bool = False
     event_handler: DiscordBotEventHandler
     modules: List[Type[Module]]
+    pics_suggestion_module: PicsSuggestionModule
 
     def __init__(self, config_path: str, logger: Logger, formatter: Formatter): ...
 
