@@ -1,3 +1,11 @@
 async def message_restart(message, args_str, bot):
     if message.author.guild_permissions.administrator:
-        bot.shutdown('Restarting.')
+        if args_str:
+            try:
+                timeout = int(args_str)
+            except ValueError:
+                return
+        else:
+            timeout = None
+
+        bot.stop('Restarting.', timeout)
