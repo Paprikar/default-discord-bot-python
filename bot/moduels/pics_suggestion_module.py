@@ -58,7 +58,7 @@ class PicsSuggestionModule(Module):
         except asyncio.CancelledError:  # on timeout
             await self.site.stop()
 
-    async def _request_handler(self, request: web.Request):
+    async def _request_handler(self, request):
         try:
             if self.to_close.locked():
                 msg = 'Suggestion service unavailable.'

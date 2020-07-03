@@ -28,12 +28,13 @@ class DiscordBotEventHandler:
 
     async def on_ready(self):
         guilds = self.bot.client.guilds
-        if guilds:
-            msg = (f'{self.bot.client.user} '
-                   'is connected to the following servers:')
-            for guild in guilds:
-                msg += f'\n  {guild.name} (id: {guild.id})'
-            self.bot.logger.info(self._log_prefix + msg)
+        if not guilds:
+            return
+        msg = (f'{self.bot.client.user} '
+               'is connected to the following servers:')
+        for guild in guilds:
+            msg += f'\n  {guild.name} (id: {guild.id})'
+        self.bot.logger.info(self._log_prefix + msg)
 
     async def on_shard_ready(self, shard_id):
         pass

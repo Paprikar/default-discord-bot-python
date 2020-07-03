@@ -2,6 +2,7 @@ from typing import Dict
 from typing import Optional
 from typing import Tuple
 
+from aiohttp import web
 from aiohttp.web import Server
 from aiohttp.web import ServerRunner
 from aiohttp.web import TCPSite
@@ -23,4 +24,10 @@ class PicsSuggestionModule(Module):
 
     async def close(self, timeout: Optional[float] = None): ...
 
+    async def _closer(self, timeout: Optional[float]): ...
+
+    async def _request_handler(self, request: web.Request): ...
+
     async def reaction_handler(self, payload: RawReactionActionEvent): ...
+
+    async def _save_file(self, url: str, directory: str): ...
