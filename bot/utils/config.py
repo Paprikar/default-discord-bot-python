@@ -100,7 +100,7 @@ def parse_config(config_path, logger, formatter):
         logger.critical(msg)
         raise TypeError(msg)
     #  PICS_CATEGORIES
-    pics_categories = config.get('pics_categories')  # type: dict
+    pics_categories = config.get('pics_categories')
     if not (pics_categories is None
             or isinstance(pics_categories, dict)):
         logger.error(

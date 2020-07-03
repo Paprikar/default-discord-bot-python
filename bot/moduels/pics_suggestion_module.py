@@ -5,6 +5,7 @@ from datetime import timezone
 
 import aiofiles
 import aiohttp
+import discord
 from aiohttp import web
 
 from .module import Module
@@ -13,9 +14,9 @@ from .module import Module
 class PicsSuggestionModule(Module):
 
     def __init__(self, bot):
+        self._log_prefix = f'{type(self).__name__}: '
+
         self.bot = bot
-        self.closable = asyncio.Event()
-        self.closable.set()
         self.to_close = asyncio.Lock()
 
         categories = self.bot.pics_categories
@@ -24,78 +25,113 @@ class PicsSuggestionModule(Module):
                 (categories[k]['directory'],
                  categories[k]['suggestion_positive'],
                  categories[k]['suggestion_negative'])
-            for k in self.bot.pics_categories}
+            for k in categories}
 
         self.server = web.Server(self._request_handler)
         self.server_runner = web.ServerRunner(self.server)
         self.site = None
 
-
     def run(self):
-        self.task = self.bot.loop.create_task(self.start())
-
+        self.bot.loop.create_task(self.start())
 
     async def start(self):
         await self.server_runner.setup()
         self.site = web.TCPSite(self.server_runner, 'localhost', 21520)
         await self.site.start()
 
+    def stop(self, timeout=None):
+        self.close_task = self.bot.loop.create_task(self.close(timeout))
 
-    async def close(self):
-        await self.to_close.acquire()
-        await self.closable.wait()
-        await self.site.stop()
-        await self.server.shutdown()
-        self.task.cancel()
+    async def close(self, timeout=None):
+        try:
+            await self.to_close.acquire()
+            await asyncio.wait_for(self._closer(timeout), timeout)
+        except asyncio.TimeoutError:
+            self.bot.logger.warning(
+                self._log_prefix +
+                'The execution was forcibly terminated by timeout.')
 
+    async def _closer(self, timeout):
+        try:
+            await self.server.shutdown(timeout)
+            await self.site.stop()
+        except asyncio.CancelledError:  # on timeout
+            await self.site.stop()
 
     async def _request_handler(self, request: web.Request):
-        self.closable.clear()
-
-        json = await request.json()
-
-        if ('category' not in json
-            or 'link' not in json
-            or json['category'] not in self.bot.pics_categories
-            or not isinstance(json['link'], str)):
-            msg = 'POST request has incorrect data.'
-            self.bot.logger.warning(msg)
-            self.closable.set()
-            return web.Response(status=501, text=msg)
-
-        category = json['category']
-        link = json['link']
-
-        channel = self.bot.client.get_channel(
-            self.bot.pics_categories[category]['suggestion_channel_id'])
-
-        positive = self.bot.pics_categories[category]['suggestion_positive']
-        negative = self.bot.pics_categories[category]['suggestion_negative']
-
         try:
-            message = await channel.send(link)
-            await message.add_reaction(positive)
-            await message.add_reaction(negative)
-        except Exception as e:
-            self.bot.logger.error(
-                f'Caught an exception of type `{type(e).__name__}` '
-                f'in `PicsSuggestionModule._request_handler`: {e}')
-            self.closable.set()
-            return web.Response(status=500)
+            if self.to_close.locked():
+                msg = 'Suggestion service unavailable.'
+                self.bot.logger.warning(self._log_prefix + msg)
+                return web.Response(status=503, text=msg)
 
-        self.closable.set()
-        return web.Response(text='OK')
+            json = await request.json()  # type: dict
 
+            category = json.get('category', None)
+            link = json.get('link', None)
+
+            if (category is None or
+                    link is None or
+                    category not in self.bot.pics_categories or
+                    not isinstance(link, str)):
+                msg = 'POST request has invalid data.'
+                self.bot.logger.warning(self._log_prefix + msg)
+                return web.Response(status=501, text=msg)
+
+            timeout = json.get('timeout', None)
+            if not (timeout is None or isinstance(timeout, (float, int))):
+                timeout = None
+                self.bot.logger.warning(
+                    self._log_prefix +
+                    'The POST request was received '
+                    'with invalid timeout parameter.')
+            try:
+                await asyncio.wait_for(
+                    self.bot.client.wait_until_ready(), timeout)
+            except asyncio.TimeoutError:
+                msg = ('The bot is not ready to process '
+                       'the request at this time.')
+                self.bot.logger.warning(self._log_prefix + msg)
+                return web.Response(status=503, text=msg)
+
+            category_data = self.bot.pics_categories[category]
+            channel = self.bot.client.get_channel(
+                category_data['suggestion_channel_id'])
+            positive = category_data['suggestion_positive']
+            negative = category_data['suggestion_negative']
+
+            try:
+                message = await channel.send(link)
+                await message.add_reaction(positive)
+                await message.add_reaction(negative)
+            except (discord.HTTPException, discord.InvalidArgument) as e:
+                msg = (f'Caught an exception of type `{type(e).__name__}` '
+                       f'while sending the suggestion: {str(e)}')
+                self.bot.logger.error(self._log_prefix + msg)
+                return web.Response(status=500, text=msg)
+
+            return web.Response(text='OK')
+
+        except asyncio.CancelledError:
+            msg = ('The bot is not ready to process '
+                   'the request at this time.')
+            return web.Response(status=503, text=msg)
 
     async def reaction_handler(self, payload):
-        self.closable.clear()
+        if self.to_close.locked():
+            self.bot.logger.warning(
+                self._log_prefix +
+                'Ignoring the reaction event: '
+                '`reaction_handler` is already closed.')
+            return
+
+        if payload.user_id == self.bot.client.user.id:
+            return  # Do not respond to bot actions
+
+        await self.bot.client.wait_until_ready()
 
         channel = self.bot.client.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
-
-        if payload.user_id == self.bot.client.user.id:
-            self.closable.set()
-            return  # Do not respond to bot actions
 
         try:
             (
@@ -104,7 +140,6 @@ class PicsSuggestionModule(Module):
                 negative,
             ) = self.suggestion_info[message.channel.id]
         except KeyError:
-            self.closable.set()
             return  # Respond only to actions in suggestion channels
 
         positive_count = 0
@@ -116,22 +151,21 @@ class PicsSuggestionModule(Module):
                 negative_count = reaction.count
 
         if positive_count > negative_count:
-            saved = await self._save_file(message.content, directory)
-            to_delete = saved
+            is_saved = await self._save_file(message.content, directory)
+            to_delete = is_saved
         elif negative_count > positive_count:
             self.bot.logger.info(
+                self._log_prefix +
                 f'Rejected a picture by URL: "{message.content}".')
             to_delete = True
 
         if to_delete:
             try:
                 await message.delete()
-            except:
+            except discord.HTTPException:
                 self.bot.logger.error(
+                    self._log_prefix +
                     'Can not delete the message after approval.')
-
-        self.closable.set()
-
 
     async def _save_file(self, url, directory):
         try:
@@ -139,6 +173,7 @@ class PicsSuggestionModule(Module):
                 async with session.get(url) as response:
                     if response.status != 200:
                         self.bot.logger.error(
+                            self._log_prefix +
                             'An error occurred while saving the picture: '
                             'The client received a response with the status '
                             f'{response.status}.')
@@ -147,6 +182,7 @@ class PicsSuggestionModule(Module):
                     ext = os.path.splitext(url)[1]
                     if ext.lower() not in ('.png', '.jpg', '.jpeg'):
                         self.bot.logger.error(
+                            self._log_prefix +
                             'An error occurred while saving the picture: '
                             'The URL should point to a file with one of the '
                             'following extensions: (".png", ".jpg", ".jpeg"), '
@@ -158,12 +194,14 @@ class PicsSuggestionModule(Module):
                     await f.write(await response.read())
                     await f.close()
                     self.bot.logger.info(
+                        self._log_prefix +
                         f'Saved a picture by URL: "{url}" '
                         f'on the path: "{path}".')
         except Exception as e:
             self.bot.logger.error(
+                self._log_prefix +
                 f'Caught an exception of type `{type(e).__name__}` '
-                f'in `PicsSuggestionModule._save_file`: {e}')
+                f'while saving the picture`: {e}')
             return False
 
         return True

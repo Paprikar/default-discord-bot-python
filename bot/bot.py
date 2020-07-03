@@ -12,16 +12,15 @@ from .utils import parse_config
 class DiscordBot:
 
     def __init__(self, config_path, logger, formatter):
+        self._log_prefix = f'{type(self).__name__}: '
+
         self.config_path = config_path
         self.logger = logger
         self.formatter = formatter
 
         sys.excepthook = self._handle_unhandled_exception
 
-        self.pics_suggestion_module = None
-
         self._init()
-
 
     def _init(self):
         self.loop = asyncio.get_event_loop()
@@ -37,26 +36,24 @@ class DiscordBot:
         self.event_handler = DiscordBotEventHandler(self)
         self.modules = []
 
-
     def _handle_unhandled_exception(self, exc_type, exc_value, exc_traceback):
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
             return
-        self.logger.critical(
+        self.logger.error(
+            self._log_prefix +
             'Unhandled exception: ',
             exc_info=(exc_type, exc_value, exc_traceback))
-
 
     def run(self):
         while True:
             if self.pics_categories:
-                for category_name in self.pics_categories:
-                    module = PicsSendingModule(self, category_name)
-                    self.modules.append(module)
-                    module.run()
+                module = PicsSendingModule(self)
+                self.modules.append(module)
+                module.run()
 
                 module = PicsSuggestionModule(self)
-                self.pics_suggestion_module = module
+                self.modules.append(module)
                 module.run()
 
             self.loop.create_task(self.client.start(self.token))
@@ -64,7 +61,7 @@ class DiscordBot:
             try:
                 self.loop.run_forever()
             except (SystemExit, KeyboardInterrupt):
-                self.shutdown('Shutting down.')
+                self.stop('Shutting down.')
                 break
             else:
                 if self.shutdown_allowed:
@@ -72,20 +69,27 @@ class DiscordBot:
                 else:
                     self._init()
 
-
-    def shutdown(self, msg):
-        self.logger.info(msg)
-        self.loop.create_task(self.close())
+    def stop(self, msg=None, timeout=None):
+        if msg is not None:
+            self.logger.info(self._log_prefix + msg)
+        self.loop.create_task(self.close(timeout))
         self.loop.run_forever()
         self.loop.close()
 
-
-    async def close(self):
+    async def close(self, timeout=None):
         for module in self.modules:
-            await module.close()
-        await self.pics_suggestion_module.close()
+            module.stop(timeout)
+        close_tasks = [module.close_task for module in self.modules]
+        await asyncio.gather(*close_tasks)
+
         await self.client.close()
         tasks = [t for t in asyncio.all_tasks()
                  if t is not asyncio.current_task()]
         await asyncio.gather(*tasks)
         self.loop.stop()
+
+    def get_module(self, module_type):
+        for module in self.modules:
+            if isinstance(module, module_type):
+                return module
+        return None

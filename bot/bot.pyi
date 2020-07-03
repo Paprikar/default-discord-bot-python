@@ -2,13 +2,17 @@ from asyncio import AbstractEventLoop
 from logging import Formatter
 from logging import Logger
 from typing import List
+from typing import Optional
 from typing import Type
+from typing import TypeVar
 
 from discord import Client
 
 from .bot_event_handler import DiscordBotEventHandler
 from .moduels import Module
-from .moduels import PicsSuggestionModule
+
+
+T_Module = TypeVar('T_Module', bound=Module)
 
 
 class DiscordBot:
@@ -24,12 +28,13 @@ class DiscordBot:
     shutdown_allowed: bool = False
     event_handler: DiscordBotEventHandler
     modules: List[Type[Module]]
-    pics_suggestion_module: PicsSuggestionModule
 
     def __init__(self, config_path: str, logger: Logger, formatter: Formatter): ...
 
     def run(self): ...
 
-    def shutdown(self, msg: str): ...
+    def stop(self, msg: Optional[str] = None, timeout: Optional[float] = None): ...
 
-    async def close(self): ...
+    async def close(self, timeout: Optional[float] = None): ...
+
+    def get_module(self, module_type: Type[T_Module]) -> Optional[T_Module]: ...
