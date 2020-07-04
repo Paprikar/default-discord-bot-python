@@ -1,6 +1,5 @@
 from asyncio import Lock
 from asyncio import Task
-from typing import List
 from typing import Optional
 
 from ..bot import DiscordBot

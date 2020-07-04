@@ -27,7 +27,7 @@ class PicsSuggestionModule(Module):
                  categories[k]['suggestion_negative'])
             for k in categories}
 
-        self.server = web.Server(self._request_handler)
+        self.server = web.Server(self._request_handler, loop=self.bot.loop)
         self.server_runner = web.ServerRunner(self.server)
         self.site = None
 
@@ -58,7 +58,7 @@ class PicsSuggestionModule(Module):
         except asyncio.CancelledError:  # on timeout
             await self.site.stop()
 
-    async def _request_handler(self, request: web.Request):
+    async def _request_handler(self, request):
         try:
             if self.to_close.locked():
                 msg = 'Suggestion service unavailable.'
@@ -146,9 +146,9 @@ class PicsSuggestionModule(Module):
         negative_count = 0
         for reaction in message.reactions:
             if reaction.emoji == positive:
-                positive_count = reaction.count
+                positive_count = reaction.count - int(reaction.me)
             elif reaction.emoji == negative:
-                negative_count = reaction.count
+                negative_count = reaction.count - int(reaction.me)
 
         if positive_count > negative_count:
             is_saved = await self._save_file(message.content, directory)
@@ -176,7 +176,8 @@ class PicsSuggestionModule(Module):
                             self._log_prefix +
                             'An error occurred while saving the picture: '
                             'The client received a response with the status '
-                            f'{response.status}.')
+                            f'`{response.status}` and with the message: '
+                            f'"{await response.text()}".')
                         return False
                     now = datetime.now(timezone.utc).timestamp() * 1000
                     ext = os.path.splitext(url)[1]
