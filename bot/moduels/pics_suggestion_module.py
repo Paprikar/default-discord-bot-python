@@ -146,9 +146,9 @@ class PicsSuggestionModule(Module):
         negative_count = 0
         for reaction in message.reactions:
             if reaction.emoji == positive:
-                positive_count = reaction.count
+                positive_count = reaction.count - int(reaction.me)
             elif reaction.emoji == negative:
-                negative_count = reaction.count
+                negative_count = reaction.count - int(reaction.me)
 
         if positive_count > negative_count:
             is_saved = await self._save_file(message.content, directory)
