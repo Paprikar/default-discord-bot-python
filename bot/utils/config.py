@@ -122,27 +122,29 @@ def _check_category(category, category_name, logger):
                'PicsSuggestionModule'}
 
     if not isinstance(category_name, str):
-        logger.error(f'Key `pics_categories/{category_name}`'
+        logger.error(f'Key `pics_categories/{category_name}` '
                      'is not a string type.')
         return set()
     if not isinstance(category, dict):
-        logger.error(f'Value of `pics_categories/{category_name}`'
+        logger.error(f'Value of `pics_categories/{category_name}` '
                      'is not a dict type.')
         return set()
     #  directory
     directory = category['directory']
     msg = (
         'For the sending and suggestion modules to work, it is necessary '
-        f'that the value of `pics_categories/{category_name} must contain '
+        f'that the value of `pics_categories/{category_name}` must contain '
         'the "directory" key.')
     if not isinstance(directory, str):
-        logger.error(f'Value of `pics_categories/{category_name}/'
-                     f'directory` is not a string type. {msg}')
+        logger.error(
+            f'Value of `pics_categories/{category_name}/directory` '
+            f'is not a string type. {msg}')
         modules.remove('PicsSendingModule')
         modules.remove('PicsSuggestionModule')
     elif not path.isdir(directory):
-        logger.error(f'Value of `pics_categories/{category_name}/'
-                     f'directory` should point to an existing folder. {msg}')
+        logger.error(
+            f'Value of `pics_categories/{category_name}/directory` '
+            f'should point to an existing folder. {msg}')
         modules.remove('PicsSendingModule')
         modules.remove('PicsSuggestionModule')
     else:
@@ -165,7 +167,7 @@ def _check_pics_sending_module(category, category_name, logger):
     if (category.keys() & keys and not category.keys() >= keys):
         logger.error(
             'For the sending module to work, it is necessary that the '
-            f'value of `pics_categories/{category_name} must contain '
+            f'value of `pics_categories/{category_name}` must contain '
             'the following keys: ["directory", "send_channel_id", '
             '"send_time"].')
         return False
@@ -192,7 +194,7 @@ def _check_pics_suggestion_module(category, category_name, logger):
     if (category.keys() & keys and not category.keys() >= keys):
         logger.error(
             'For the suggestion module to work, it is necessary that the '
-            f'value of `pics_categories/{category_name} must contain '
+            f'value of `pics_categories/{category_name}` must contain '
             'the following keys: ["directory", "suggestion_channel_id", '
             '"suggestion_positive", "suggestion_negative"].')
         return False

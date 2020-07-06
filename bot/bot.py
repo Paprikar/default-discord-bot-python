@@ -37,11 +37,13 @@ class DiscordBot:
         self.modules = []
 
         msg = 'Activated modules:\n'
-        for k in self.pics_categories:
-            msg += f'  {k}:\n'
-            for module in self.pics_categories[k]['modules']:
-                msg += f'    {module}\n'
-        self.logger.info(self._log_prefix + msg.rstrip())
+        if self.pics_categories:
+            msg += '  Pics categories:\n'
+            for k in self.pics_categories:
+                msg += f'    {k}:\n'
+                for module in self.pics_categories[k]['modules']:
+                    msg += f'      {module}\n'
+            self.logger.info(self._log_prefix + msg.rstrip())
 
     def _handle_unhandled_exception(self, exc_type, exc_value, exc_traceback):
         if issubclass(exc_type, KeyboardInterrupt):
