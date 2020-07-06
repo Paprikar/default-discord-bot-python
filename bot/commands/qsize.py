@@ -4,7 +4,8 @@ from ..utils.utils import get_pics_path_list
 
 
 async def message_qsize(message, args_str, bot):
-    pics_categories = bot.pics_categories
+    pics_categories = {k: v for k, v in bot.pics_categories.items()
+                       if 'PicsSendingModule' in v['modules']}
     category_names = set()
     args = args_str.split()
     if not args or 'all' in args:

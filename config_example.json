@@ -4,30 +4,30 @@
     "bot_channel_id": 1234567890,
     "pics_categories": {
         "cats": {
-            "send_channel_id": 1234567890,
-            "suggestion_channel_id": 1234567890,
-            "suggestion_positive": "U+2705",
-            "suggestion_negative": "U+274E",
             "directory": "./pics/cats",
+            "send_channel_id": 1234567890,
             "send_time": [
                 "16:00",
                 "17:00",
                 "18:00",
                 "19:00"
-            ]
+            ],
+            "suggestion_channel_id": 1234567890,
+            "suggestion_positive": "U+2705",
+            "suggestion_negative": "U+274E"
         },
         "nsfw": {
-            "send_channel_id": 1234567890,
-            "suggestion_channel_id": 1234567890,
-            "suggestion_positive": "U+2705",
-            "suggestion_negative": "U+274E",
             "directory": "./pics/nsfw",
+            "send_channel_id": 1234567890,
             "send_time": [
                 "16:00",
                 "17:00",
                 "18:00",
                 "19:00"
-            ]
+            ],
+            "suggestion_channel_id": 1234567890,
+            "suggestion_positive": "U+2705",
+            "suggestion_negative": "U+274E"
         }
     },
     "logging_level": "INFO",

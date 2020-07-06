@@ -1,5 +1,6 @@
 from typing import Dict
 from typing import Optional
+from typing import Set
 from typing import Tuple
 
 from aiohttp import web
@@ -13,6 +14,7 @@ from ..bot import DiscordBot
 
 
 class PicsSuggestionModule(Module):
+    categories: Set[str]
     suggestion_info: Dict[int, Tuple[str, str, str]]
     server: Server
     server_runner: ServerRunner

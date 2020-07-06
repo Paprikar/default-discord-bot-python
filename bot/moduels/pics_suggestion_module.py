@@ -19,13 +19,16 @@ class PicsSuggestionModule(Module):
         self.bot = bot
         self.to_close = asyncio.Lock()
 
-        categories = self.bot.pics_categories
+        categories_data = self.bot.pics_categories
+        self.categories = {
+            k for k in categories_data
+            if type(self).__name__ in categories_data[k]['modules']}
         self.suggestion_info = {
-            categories[k]['suggestion_channel_id']:
-                (categories[k]['directory'],
-                 categories[k]['suggestion_positive'],
-                 categories[k]['suggestion_negative'])
-            for k in categories}
+            categories_data[k]['suggestion_channel_id']:
+                (categories_data[k]['directory'],
+                 categories_data[k]['suggestion_positive'],
+                 categories_data[k]['suggestion_negative'])
+            for k in self.categories}
 
         self.server = web.Server(self._request_handler, loop=self.bot.loop)
         self.server_runner = web.ServerRunner(self.server)
@@ -72,7 +75,7 @@ class PicsSuggestionModule(Module):
 
             if (category is None or
                     link is None or
-                    category not in self.bot.pics_categories or
+                    category not in self.categories or
                     not isinstance(link, str)):
                 msg = 'POST request has invalid data.'
                 self.bot.logger.warning(self._log_prefix + msg)

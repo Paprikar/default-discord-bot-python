@@ -20,6 +20,9 @@ class PicsSendingModule(Module):
 
     def run(self):
         for category_name in self.bot.pics_categories:
+            modules = self.bot.pics_categories[category_name]['modules']
+            if type(self).__name__ not in modules:
+                continue
             event = asyncio.Event()
             event.set()
             task = self.bot.loop.create_task(self.start(category_name))
