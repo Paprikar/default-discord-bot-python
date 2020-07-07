@@ -35,6 +35,7 @@ class PicsSendingModule(Module):
             send_directory = category['send_directory']
             send_channel_id = category['send_channel_id']
             send_time = category['send_time']
+            send_archive_directory = category['send_archive_directory']
 
             while not (self.bot.client.is_closed() or self.to_close.locked()):
                 await self.bot.client.wait_until_ready()
@@ -47,7 +48,9 @@ class PicsSendingModule(Module):
                 if permit:
                     self.tasks[current_task].clear()
                     is_sended = await self._send_pic(
-                        send_channel_id, send_directory)
+                        send_channel_id,
+                        send_directory,
+                        send_archive_directory)
                     self.tasks[current_task].set()
 
                     sleep_time = (send_cooldown if is_sended
@@ -93,7 +96,7 @@ class PicsSendingModule(Module):
         else:
             return (False, 60, 1)
 
-    async def _send_pic(self, channel_id, directory):
+    async def _send_pic(self, channel_id, directory, archive_directory):
         channel = self.bot.client.get_channel(channel_id)
         pics_path_list = get_pics_path_list(directory)
 
@@ -110,12 +113,22 @@ class PicsSendingModule(Module):
                 self._log_prefix +
                 f'Sent a picture on the path: "{pic_path}".')
             file.close()
-            try:
-                os.remove(pic_path)
-            except OSError:
-                self.bot.logger.error(
-                    self._log_prefix +
-                    f'Can not remove "{pic_path}" file from disk.')
+            if archive_directory is None:
+                try:
+                    os.remove(pic_path)
+                except OSError as e:
+                    self.bot.logger.error(
+                        self._log_prefix +
+                        f'Can not remove "{pic_path}" file from disk: {e}')
+            else:
+                try:
+                    dst = path.join(archive_directory, path.basename(pic_path))
+                    os.rename(pic_path, dst)
+                except OSError as e:
+                    self.bot.logger.error(
+                        self._log_prefix +
+                        f'Can not move "{pic_path}" file '
+                        f'to the archive directory: {e}')
         except Exception as e:
             self.bot.logger.error(
                 self._log_prefix +

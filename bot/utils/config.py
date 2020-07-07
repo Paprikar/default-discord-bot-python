@@ -174,6 +174,23 @@ def _check_pics_sending_module(category, category_name, logger):
                'send_time` is not a list type.')
         logger.critical(msg)
         raise TypeError(msg)
+    #  send_archive_directory
+    directory = category.get('send_archive_directory')
+    if directory is None:
+        category['send_archive_directory'] = None
+    else:
+        if not isinstance(directory, str):
+            msg = (f'Value of `pics_categories/{category_name}/'
+                   'send_archive_directory` is not a string type.')
+            logger.critical(msg)
+            raise TypeError(msg)
+        if not path.isdir(directory):
+            msg = (f'Value of `pics_categories/{category_name}/'
+                   'send_archive_directory` should point '
+                   'to an existing folder.')
+            logger.critical(msg)
+            raise ValueError(msg)
+        category['send_archive_directory'] = path.normcase(directory)
 
     return True
 
