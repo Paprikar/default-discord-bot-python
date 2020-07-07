@@ -104,37 +104,38 @@ class PicsSendingModule(Module):
             return False
 
         pic_path = self._select_pic(pics_path_list)
-        pass_flag = False
         try:
             file = discord.File(pic_path, filename=path.basename(pic_path))
             await channel.send(file=file)
-            pass_flag = True
-            self.bot.logger.info(
-                self._log_prefix +
-                f'Sent a picture on the path: "{pic_path}".')
             file.close()
-            if archive_directory is None:
-                try:
-                    os.remove(pic_path)
-                except OSError as e:
-                    self.bot.logger.error(
-                        self._log_prefix +
-                        f'Can not remove "{pic_path}" file from disk: {e}')
-            else:
-                try:
-                    dst = path.join(archive_directory, path.basename(pic_path))
-                    os.rename(pic_path, dst)
-                except OSError as e:
-                    self.bot.logger.error(
-                        self._log_prefix +
-                        f'Can not move "{pic_path}" file '
-                        f'to the archive directory: {e}')
         except Exception as e:
             self.bot.logger.error(
                 self._log_prefix +
                 f'Caught an exception of type `{type(e).__name__}` '
                 f'while sending the picture: {e}')
-        return pass_flag
+            return False
+        self.bot.logger.info(
+            self._log_prefix +
+            f'Sent a picture on the path: "{pic_path}".')
+
+        if archive_directory is None:
+            try:
+                os.remove(pic_path)
+            except OSError as e:
+                self.bot.logger.error(
+                    self._log_prefix +
+                    f'Can not remove "{pic_path}" file from disk: {e}')
+        else:
+            try:
+                dst = path.join(archive_directory, path.basename(pic_path))
+                os.rename(pic_path, dst)
+            except OSError as e:
+                self.bot.logger.error(
+                    self._log_prefix +
+                    f'Can not move "{pic_path}" file '
+                    f'to the archive directory: {e}')
+
+        return True
 
     @staticmethod
     def _select_pic(pics):
