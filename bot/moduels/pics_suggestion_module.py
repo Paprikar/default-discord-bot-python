@@ -25,7 +25,7 @@ class PicsSuggestionModule(Module):
             if type(self).__name__ in categories_data[k]['modules']}
         self.suggestion_info = {
             categories_data[k]['suggestion_channel_id']:
-                (categories_data[k]['directory'],
+                (categories_data[k]['suggestion_directory'],
                  categories_data[k]['suggestion_positive'],
                  categories_data[k]['suggestion_negative'])
             for k in self.categories}

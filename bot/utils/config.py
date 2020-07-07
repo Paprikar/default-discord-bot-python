@@ -22,13 +22,15 @@ def parse_config(config_path, logger, formatter):
     logging_file = config.get('logging_file')
     if not (logging_file is None
             or isinstance(logging_file, str)):
-        logger.error('Parameter `logging_file` is not a string type.')
-        logging_file = None
+        msg = 'Parameter `logging_file` is not a string type.'
+        logger.critical(msg)
+        raise TypeError(msg)
     if not (logging_file is None
             or path.exists(path.dirname(logging_file))):
-        logger.error('Parameter `logging_file` points to a file '
-                     'in a non-existent folder.')
-        logging_file = None
+        msg = ('Parameter `logging_file` points to a file '
+               'in a non-existent folder.')
+        logger.critical(msg)
+        raise ValueError(msg)
     if logging_file is None:
         logger.info('Parameter `logging_file` is set '
                     'to "./launch.py.log" by default.')
@@ -55,11 +57,11 @@ def parse_config(config_path, logger, formatter):
     elif logging_level in (5, 'CRITICAL'):
         logging_level = logging.CRITICAL
     elif logging_level is not None:
-        logger.error(
-            'Parameter `logging_level` can only be one of the '
-            'following values: [1, "DEBUG", 2, "INFO", '
-            '3, "WARNING", 4, "ERROR", 5, "CRITICAL"].')
-        logging_level = None
+        msg = ('Parameter `logging_level` can only be one of the '
+               'following values: [1, "DEBUG", 2, "INFO", '
+               '3, "WARNING", 4, "ERROR", 5, "CRITICAL"].')
+        logger.critical(msg)
+        raise ValueError(msg)
     if logging_level is None:
         logger.info(
             'Parameter `logging_level` is set to "INFO" by default.')
@@ -79,14 +81,9 @@ def parse_config(config_path, logger, formatter):
     command_prefix = config.get('command_prefix')
     if not (command_prefix is None
             or isinstance(command_prefix, str)):
-        logger.error(
-            'Parameter `command_prefix` is not a string type.')
-        command_prefix = None
-    if not (command_prefix is None
-            or len(command_prefix) == 1):
-        logger.error(
-            'Parameter `command_prefix` can only be one symbol.')
-        command_prefix = None
+        msg = 'Parameter `command_prefix` is not a string type.'
+        logger.critical(msg)
+        raise TypeError(msg)
     if command_prefix is None:
         logger.info(
             'Parameter `command_prefix` is set to "!" by default.')
@@ -105,109 +102,125 @@ def parse_config(config_path, logger, formatter):
     pics_categories = config.get('pics_categories')
     if not (pics_categories is None
             or isinstance(pics_categories, dict)):
-        logger.error(
-            'Parameter `pics_categories` is not a dict type.')
-        pics_categories = None
+        msg = 'Parameter `pics_categories` is not a dict type.'
+        logger.critical(msg)
+        raise TypeError(msg)
     if pics_categories is not None:
         for category_name in pics_categories:
-            modules = _check_category(
+            _check_category(
                 pics_categories[category_name], category_name, logger)
-            pics_categories[category_name]['modules'] = modules
 
     return token, command_prefix, bot_channel_id, pics_categories
 
 
 def _check_category(category, category_name, logger):
-    modules = {'PicsSendingModule',
-               'PicsSuggestionModule'}
-
     if not isinstance(category_name, str):
-        logger.error(f'Key `pics_categories/{category_name}` '
-                     'is not a string type.')
-        return set()
+        msg = (f'Key `pics_categories/{category_name}` is not a string type.')
+        logger.critical(msg)
+        raise TypeError(msg)
     if not isinstance(category, dict):
-        logger.error(f'Value of `pics_categories/{category_name}` '
-                     'is not a dict type.')
-        return set()
-    #  directory
-    directory = category['directory']
-    msg = (
-        'For the sending and suggestion modules to work, it is necessary '
-        f'that the value of `pics_categories/{category_name}` must contain '
-        'the "directory" key.')
-    if not isinstance(directory, str):
-        logger.error(
-            f'Value of `pics_categories/{category_name}/directory` '
-            f'is not a string type. {msg}')
-        modules.remove('PicsSendingModule')
-        modules.remove('PicsSuggestionModule')
-    elif not path.isdir(directory):
-        logger.error(
-            f'Value of `pics_categories/{category_name}/directory` '
-            f'should point to an existing folder. {msg}')
-        modules.remove('PicsSendingModule')
-        modules.remove('PicsSuggestionModule')
-    else:
-        category['directory'] = path.normcase(directory)
+        msg = (f'Value of `pics_categories/{category_name}` '
+               'is not a dict type.')
+        logger.critical(msg)
+        raise TypeError(msg)
 
-    if ('PicsSendingModule' in modules and
-            not _check_pics_sending_module(category, category_name, logger)):
-        modules.remove('PicsSendingModule')
+    modules = set()
+    if _check_pics_sending_module(category, category_name, logger):
+        modules.add('PicsSendingModule')
+    if _check_pics_suggestion_module(category, category_name, logger):
+        modules.add('PicsSuggestionModule')
 
-    if ('PicsSuggestionModule' in modules and
-            not _check_pics_suggestion_module(category, category_name, logger)):
-        modules.remove('PicsSuggestionModule')
-
-    return modules
+    category['modules'] = modules
 
 
 def _check_pics_sending_module(category, category_name, logger):
-    keys = {'send_channel_id',
+    keys = {'send_directory',
+            'send_channel_id',
             'send_time'}
-    if (category.keys() & keys and not category.keys() >= keys):
-        logger.error(
-            'For the sending module to work, it is necessary that the '
-            f'value of `pics_categories/{category_name}` must contain '
-            'the following keys: ["directory", "send_channel_id", '
-            '"send_time"].')
+    if category.keys() & keys:
+        if not category.keys() >= keys:
+            msg = ('For the sending module to work, it is necessary that the '
+                   f'value of `pics_categories/{category_name}` must contain '
+                   'the following keys: ["send_directory", '
+                   '"send_channel_id", "send_time"].')
+            logger.critical(msg)
+            raise AssertionError(msg)
+    else:
         return False
+    #  send_directory
+    directory = category['send_directory']
+    if not isinstance(directory, str):
+        msg = (f'Value of `pics_categories/{category_name}/send_directory` '
+               'is not a string type.')
+        logger.critical(msg)
+        raise TypeError(msg)
+    if not path.isdir(directory):
+        msg = (f'Value of `pics_categories/{category_name}/send_directory` '
+               'should point to an existing folder.')
+        logger.critical(msg)
+        raise ValueError(msg)
+    category['send_directory'] = path.normcase(directory)
     #  send_channel_id
     channel_id = category['send_channel_id']
     if not isinstance(channel_id, int):
-        logger.error(f'Value of `pics_categories/{category_name}/'
-                     'send_channel_id` is not an integer type.')
-        return False
+        msg = (f'Value of `pics_categories/{category_name}/'
+               'send_channel_id` is not an integer type.')
+        logger.critical(msg)
+        raise TypeError(msg)
     #  send_time
     send_time = category['send_time']
     if not isinstance(send_time, list):
-        logger.error(f'Value of `pics_categories/{category_name}/'
-                     'send_time` is not a list type.')
-        return False
+        msg = (f'Value of `pics_categories/{category_name}/'
+               'send_time` is not a list type.')
+        logger.critical(msg)
+        raise TypeError(msg)
 
     return True
 
 
 def _check_pics_suggestion_module(category, category_name, logger):
-    keys = {'suggestion_channel_id',
+    keys = {'suggestion_directory',
+            'suggestion_channel_id',
             'suggestion_positive',
             'suggestion_negative'}
-    if (category.keys() & keys and not category.keys() >= keys):
-        logger.error(
-            'For the suggestion module to work, it is necessary that the '
-            f'value of `pics_categories/{category_name}` must contain '
-            'the following keys: ["directory", "suggestion_channel_id", '
-            '"suggestion_positive", "suggestion_negative"].')
+    if category.keys() & keys:
+        if not category.keys() >= keys:
+            msg = (
+                'For the suggestion module to work, it is necessary that the '
+                f'value of `pics_categories/{category_name}` must contain '
+                'the following keys: ["suggestion_directory", '
+                '"suggestion_channel_id", "suggestion_positive", '
+                '"suggestion_negative"].')
+            logger.critical(msg)
+            raise AssertionError(msg)
+    else:
         return False
+    #  suggestion_directory
+    directory = category['suggestion_directory']
+    if not isinstance(directory, str):
+        msg = (f'Value of `pics_categories/{category_name}/'
+               f'suggestion_directory` is not a string type.')
+        logger.critical(msg)
+        raise TypeError(msg)
+    if not path.isdir(directory):
+        msg = (f'Value of `pics_categories/{category_name}/'
+               'suggestion_directory` should point to an existing folder.')
+        logger.critical(msg)
+        raise ValueError(msg)
+    category['suggestion_directory'] = path.normcase(directory)
     #  suggestion_channel_id
     channel_id = category['suggestion_channel_id']
     if not isinstance(channel_id, int):
-        logger.error(f'Value of `pics_categories/{category_name}/'
-                     'suggestion_channel_id` is not an integer type.')
-        return False
+        msg = (f'Value of `pics_categories/{category_name}/'
+               'suggestion_channel_id` is not an integer type.')
+        logger.critical(msg)
+        raise TypeError(msg)
     #  suggestion_positive
-    _check_emoji(category, category_name, 'suggestion_positive', 'U+2705', logger)
+    _check_emoji(
+        category, category_name, 'suggestion_positive', 'U+2705', logger)
     #  suggestion_negative
-    _check_emoji(category, category_name, 'suggestion_negative', 'U+274E', logger)
+    _check_emoji(
+        category, category_name, 'suggestion_negative', 'U+274E', logger)
 
     return True
 
@@ -215,22 +228,25 @@ def _check_pics_suggestion_module(category, category_name, logger):
 def _check_emoji(category, category_name, key, default, logger):
     emoji = category.get(key)
     if not (emoji is None or isinstance(emoji, str)):
-        logger.error(f'Value of `pics_categories/{category_name}/{key}` '
-                     'is not a string type.')
-        emoji = None
+        msg = (f'Value of `pics_categories/{category_name}/{key}` '
+               'is not a string type.')
+        logger.critical(msg)
+        raise TypeError(msg)
     if emoji is not None:
         try:
             emoji = codepoint_to_str(emoji)
         except ValueError:
-            logger.error(
+            msg = (
                 f'Value of `pics_categories/{category_name}/{key}` '
                 'must point to a Unicode character.')
-            emoji = None
+            logger.critical(msg)
+            raise ValueError(msg)
     if not (emoji is None or len(emoji) == 1):
-        logger.error(
+        msg = (
             f'Value of `pics_categories/{category_name}/{key}` '
             'can only be one symbol after conversion to Unicode.')
-        emoji = None
+        logger.critical(msg)
+        raise ValueError(msg)
     if emoji is None:
         logger.info(f'Value of `pics_categories/{category_name}/'
                     f'{key}` is set to "{default}" by default.')

@@ -4,7 +4,7 @@
     "bot_channel_id": 1234567890,
     "pics_categories": {
         "cats": {
-            "directory": "./pics/cats",
+            "send_directory": "./pics/cats",
             "send_channel_id": 1234567890,
             "send_time": [
                 "16:00",
@@ -12,12 +12,13 @@
                 "18:00",
                 "19:00"
             ],
+            "suggestion_directory": "./pics/cats",
             "suggestion_channel_id": 1234567890,
             "suggestion_positive": "U+2705",
             "suggestion_negative": "U+274E"
         },
         "nsfw": {
-            "directory": "./pics/nsfw",
+            "send_directory": "./pics/nsfw",
             "send_channel_id": 1234567890,
             "send_time": [
                 "16:00",
@@ -25,6 +26,7 @@
                 "18:00",
                 "19:00"
             ],
+            "suggestion_directory": "./pics/nsfw",
             "suggestion_channel_id": 1234567890,
             "suggestion_positive": "U+2705",
             "suggestion_negative": "U+274E"

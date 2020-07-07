@@ -32,8 +32,8 @@ class PicsSendingModule(Module):
         try:
             current_task = asyncio.current_task()
             category = self.bot.pics_categories[category_name]
+            send_directory = category['send_directory']
             send_channel_id = category['send_channel_id']
-            directory = category['directory']
             send_time = category['send_time']
 
             while not (self.bot.client.is_closed() or self.to_close.locked()):
@@ -46,7 +46,8 @@ class PicsSendingModule(Module):
 
                 if permit:
                     self.tasks[current_task].clear()
-                    is_sended = await self._send_pic(send_channel_id, directory)
+                    is_sended = await self._send_pic(
+                        send_channel_id, send_directory)
                     self.tasks[current_task].set()
 
                     sleep_time = (send_cooldown if is_sended
