@@ -127,11 +127,6 @@ class PicsSendingModule(Module):
             self.bot.logger.debug(debug_msg)
             return (False, cooldown)
 
-        # DEBUG
-        debug_msg += (
-            f'\n  start_datetime: {start_datetime}'
-            f'\n  end_datetime: {end_datetime}')
-
         if (self.last_send_datetime[category_name] is None and
             self.bot.config.db is not None):
             idle_event = self.tasks[asyncio.current_task()]
@@ -150,6 +145,12 @@ class PicsSendingModule(Module):
         last_send_datetime = self.last_send_datetime[category_name]
         if last_send_datetime is None or last_send_datetime < start_datetime:
             last_send_datetime = start_datetime
+
+        # DEBUG
+        debug_msg += (
+            f'\n  start_datetime: {start_datetime}'
+            f'\n  end_datetime: {end_datetime}'
+            f'\n  last_send_datetime: {last_send_datetime}')
 
         seconds_per_day = (end_datetime - start_datetime).total_seconds()
         seconds_total = seconds_per_day * reserve_days
