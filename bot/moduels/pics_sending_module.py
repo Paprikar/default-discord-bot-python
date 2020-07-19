@@ -104,7 +104,7 @@ class PicsSendingModule(Module):
         # DEBUG
         debug_msg = (
             self._log_prefix +
-            ' _time_check:'
+            '_time_check:'
             f'\n  current_datetime: {current_datetime}')
 
         if in_time:
