@@ -2,7 +2,7 @@ from asyncio import Lock
 from asyncio import Task
 from typing import Optional
 
-from ..bot import DiscordBot
+from bot.bot import DiscordBot
 
 
 class Module:
@@ -12,8 +12,4 @@ class Module:
 
     def run(self): ...
 
-    async def start(self, *args, **kwargs): ...
-
     def stop(self, timeout: Optional[float] = None): ...
-
-    async def close(self, *args, **kwargs): ...

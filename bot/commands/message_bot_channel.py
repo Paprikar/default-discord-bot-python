@@ -6,8 +6,10 @@ from .shutdown import message_shutdown
 
 async def message_bot_channel(message, bot):
     msg = message.content  # type: str
-    if len(msg) > 1 and msg[0] == bot.command_prefix:
-        command, *args_str = msg[1:].split(maxsplit=1)
+    if (msg.startswith(bot.config.command_prefix) and
+        len(msg) > len(bot.config.command_prefix)):
+        data = msg[len(bot.config.command_prefix):]
+        command, *args_str = data.split(maxsplit=1)
         args_str = args_str[0] if args_str else ''
 
         if command == 'ping':

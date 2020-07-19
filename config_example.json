@@ -2,16 +2,20 @@
     "token": "TOKEN",
     "command_prefix": "!",
     "bot_channel_id": 1234567890,
+    "db": {
+        "dbname": "default-discord-bot",
+        "user": "postgres",
+        "password": "password",
+        "host": "localhost",
+        "port": 5432
+    },
     "pics_categories": {
         "cats": {
             "send_directory": "./pics/cats",
             "send_channel_id": 1234567890,
-            "send_time": [
-                "16:00",
-                "17:00",
-                "18:00",
-                "19:00"
-            ],
+            "send_start": "12:00",
+            "send_end": "00:00",
+            "send_reserve_days": 30,
             "suggestion_directory": "./pics/cats",
             "suggestion_channel_id": 1234567890,
             "suggestion_positive": "U+2705",
@@ -20,12 +24,9 @@
         "nsfw": {
             "send_directory": "./pics/nsfw",
             "send_channel_id": 1234567890,
-            "send_time": [
-                "16:00",
-                "17:00",
-                "18:00",
-                "19:00"
-            ],
+            "send_start": "12:00",
+            "send_end": "00:00",
+            "send_reserve_days": 30,
             "suggestion_directory": "./pics/nsfw",
             "suggestion_channel_id": 1234567890,
             "suggestion_positive": "U+2705",

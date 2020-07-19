@@ -6,7 +6,7 @@ import discord
 from .bot_event_handler import DiscordBotEventHandler
 from .moduels import PicsSendingModule
 from .moduels import PicsSuggestionModule
-from .utils import parse_config
+from .utils import Config
 
 
 class DiscordBot:
@@ -23,25 +23,21 @@ class DiscordBot:
         self._init()
 
     def _init(self):
+        self.config = Config(self.config_path, self.logger, self.formatter)
+
         self.loop = asyncio.get_event_loop()
         self.client = discord.Client(loop=self.loop)
-        (
-            self.token,
-            self.command_prefix,
-            self.bot_channel_id,
-            self.pics_categories,
-        ) = parse_config(self.config_path, self.logger, self.formatter)
 
         self.shutdown_allowed = False
         self.event_handler = DiscordBotEventHandler(self)
         self.modules = []
 
         msg = 'Activated modules:\n'
-        if self.pics_categories:
+        if self.config.pics_categories:
             msg += '  Pics categories:\n'
-            for k in self.pics_categories:
+            for k in self.config.pics_categories:
                 msg += f'    {k}:\n'
-                for module in self.pics_categories[k]['modules']:
+                for module in self.config.pics_categories[k]['modules']:
                     msg += f'      {module}\n'
             self.logger.info(self._log_prefix + msg.rstrip())
 
@@ -56,7 +52,7 @@ class DiscordBot:
 
     def run(self):
         while True:
-            if self.pics_categories:
+            if self.config.pics_categories:
                 module = PicsSendingModule(self)
                 self.modules.append(module)
                 module.run()
@@ -65,7 +61,7 @@ class DiscordBot:
                 self.modules.append(module)
                 module.run()
 
-            self.loop.create_task(self.client.start(self.token))
+            self.loop.create_task(self.client.start(self.config.token))
 
             try:
                 self.loop.run_forever()

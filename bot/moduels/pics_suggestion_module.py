@@ -19,7 +19,7 @@ class PicsSuggestionModule(Module):
         self.bot = bot
         self.to_close = asyncio.Lock()
 
-        categories_data = self.bot.pics_categories
+        categories_data = self.bot.config.pics_categories
         self.categories = {
             k for k in categories_data
             if type(self).__name__ in categories_data[k]['modules']}
@@ -35,17 +35,17 @@ class PicsSuggestionModule(Module):
         self.site = None
 
     def run(self):
-        self.bot.loop.create_task(self.start())
+        self.bot.loop.create_task(self._start())
 
-    async def start(self):
+    async def _start(self):
         await self.server_runner.setup()
-        self.site = web.TCPSite(self.server_runner, 'localhost', 21520)
+        self.site = web.TCPSite(self.server_runner, '0.0.0.0', 21520)
         await self.site.start()
 
     def stop(self, timeout=None):
-        self.close_task = self.bot.loop.create_task(self.close(timeout))
+        self.close_task = self.bot.loop.create_task(self._close(timeout))
 
-    async def close(self, timeout=None):
+    async def _close(self, timeout):
         try:
             await self.to_close.acquire()
             await asyncio.wait_for(self._closer(timeout), timeout)
@@ -66,7 +66,7 @@ class PicsSuggestionModule(Module):
             if self.to_close.locked():
                 msg = 'Suggestion service unavailable.'
                 self.bot.logger.warning(self._log_prefix + msg)
-                return web.Response(status=503, text=msg)
+                return web.Response(status=500, text=msg)
 
             json = await request.json()  # type: dict
 
@@ -74,12 +74,12 @@ class PicsSuggestionModule(Module):
             link = json.get('link', None)
 
             if (category is None or
-                    link is None or
-                    category not in self.categories or
-                    not isinstance(link, str)):
+                link is None or
+                category not in self.categories or
+                not isinstance(link, str)):
                 msg = 'POST request has invalid data.'
                 self.bot.logger.warning(self._log_prefix + msg)
-                return web.Response(status=501, text=msg)
+                return web.Response(status=400, text=msg)
 
             timeout = json.get('timeout', None)
             if not (timeout is None or isinstance(timeout, (float, int))):
@@ -95,9 +95,9 @@ class PicsSuggestionModule(Module):
                 msg = ('The bot is not ready to process '
                        'the request at this time.')
                 self.bot.logger.warning(self._log_prefix + msg)
-                return web.Response(status=503, text=msg)
+                return web.Response(status=500, text=msg)
 
-            category_data = self.bot.pics_categories[category]
+            category_data = self.bot.config.pics_categories[category]
             channel = self.bot.client.get_channel(
                 category_data['suggestion_channel_id'])
             positive = category_data['suggestion_positive']
@@ -108,8 +108,9 @@ class PicsSuggestionModule(Module):
                 await message.add_reaction(positive)
                 await message.add_reaction(negative)
             except (discord.HTTPException, discord.InvalidArgument) as e:
-                msg = (f'Caught an exception of type `{type(e).__name__}` '
-                       f'while sending the suggestion: {str(e)}')
+                msg = ('Caught an exception of type '
+                       f'`discord.{type(e).__name__}` '
+                       f'while sending the suggestion: {e}')
                 self.bot.logger.error(self._log_prefix + msg)
                 return web.Response(status=500, text=msg)
 
@@ -118,7 +119,7 @@ class PicsSuggestionModule(Module):
         except asyncio.CancelledError:
             msg = ('The bot is not ready to process '
                    'the request at this time.')
-            return web.Response(status=503, text=msg)
+            return web.Response(status=500, text=msg)
 
     async def reaction_handler(self, payload):
         if self.to_close.locked():
@@ -196,7 +197,7 @@ class PicsSuggestionModule(Module):
                     path = os.path.join(directory, file_name)
                     f = await aiofiles.open(path, mode='wb')
                     await f.write(await response.read())
-                    await f.close()
+                    await f._close()
                     self.bot.logger.info(
                         self._log_prefix +
                         f'Saved a picture by URL: "{url}" '

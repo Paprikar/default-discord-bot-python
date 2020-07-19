@@ -9,8 +9,8 @@ from aiohttp.web import ServerRunner
 from aiohttp.web import TCPSite
 from discord import RawReactionActionEvent
 
+from bot.bot import DiscordBot
 from .module import Module
-from ..bot import DiscordBot
 
 
 class PicsSuggestionModule(Module):
@@ -22,9 +22,9 @@ class PicsSuggestionModule(Module):
 
     def __init__(self, bot: DiscordBot): ...
 
-    async def start(self): ...
+    async def _start(self): ...
 
-    async def close(self, timeout: Optional[float] = None): ...
+    async def _close(self, timeout: Optional[float]): ...
 
     async def _closer(self, timeout: Optional[float]): ...
 
