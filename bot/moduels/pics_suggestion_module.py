@@ -197,7 +197,7 @@ class PicsSuggestionModule(Module):
                     path = os.path.join(directory, file_name)
                     f = await aiofiles.open(path, mode='wb')
                     await f.write(await response.read())
-                    await f._close()
+                    await f.close()
                     self.bot.logger.info(
                         self._log_prefix +
                         f'Saved a picture by URL: "{url}" '
@@ -206,7 +206,7 @@ class PicsSuggestionModule(Module):
             self.bot.logger.error(
                 self._log_prefix +
                 f'Caught an exception of type `{type(e).__name__}` '
-                f'while saving the picture`: {e}')
+                f'while saving the picture: {e}')
             return False
 
         return True
