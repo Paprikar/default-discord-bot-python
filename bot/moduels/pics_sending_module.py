@@ -317,7 +317,8 @@ class PicsSendingModule(Module):
             except OSError as e:
                 self.bot.logger.error(
                     self._log_prefix +
-                    f'Can not remove "{pic_path}" file from disk: {e}')
+                    f'Caught an exception of type `{type(e).__name__}` '
+                    f'while removing file from disk: {e}')
         else:
             try:
                 dst = path.join(archive_directory, path.basename(pic_path))
@@ -325,7 +326,8 @@ class PicsSendingModule(Module):
             except OSError as e:
                 self.bot.logger.error(
                     self._log_prefix +
-                    f'Can not move "{pic_path}" file '
+                    f'Caught an exception of type `{type(e).__name__}` '
+                    f'while moving file "{pic_path}" '
                     f'to the archive directory: {e}')
 
         return True

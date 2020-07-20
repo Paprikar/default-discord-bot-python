@@ -172,6 +172,9 @@ class PicsSuggestionModule(Module):
                     'Can not delete the message after approval.')
 
     async def _save_file(self, url, directory):
+        file = None
+        path = None
+
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as response:
@@ -195,9 +198,10 @@ class PicsSuggestionModule(Module):
                         return False
                     file_name = str(round(now)) + ext
                     path = os.path.join(directory, file_name)
-                    f = await aiofiles.open(path, mode='wb')
-                    await f.write(await response.read())
-                    await f.close()
+                    file = await aiofiles.open(path, mode='wb')
+                    await file.write(await response.read())
+                    await file.close()
+                    file = None
                     self.bot.logger.info(
                         self._log_prefix +
                         f'Saved a picture by URL: "{url}" '
@@ -207,6 +211,15 @@ class PicsSuggestionModule(Module):
                 self._log_prefix +
                 f'Caught an exception of type `{type(e).__name__}` '
                 f'while saving the picture: {e}')
+            if file is not None:
+                await file.close()
+                try:
+                    os.remove(path)
+                except OSError as e:
+                    self.bot.logger.error(
+                        self._log_prefix +
+                        f'Caught an exception of type `{type(e).__name__}` '
+                        f'while removing file from disk: {e}')
             return False
 
         return True
