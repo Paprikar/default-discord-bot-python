@@ -1,4 +1,5 @@
 from asyncio import AbstractEventLoop
+from asyncio import Task
 from logging import Formatter
 from logging import Logger
 from typing import List
@@ -28,9 +29,13 @@ class DiscordBot:
     event_handler: DiscordBotEventHandler
     modules: List[Type[Module]]
 
+    _client_runner_task: Optional[Task]
+
     def __init__(self, config_path: str, logger: Logger, formatter: Formatter): ...
 
     def run(self): ...
+
+    async def _client_runner(self): ...
 
     def stop(self, msg: Optional[str] = None, timeout: Optional[float] = None): ...
 

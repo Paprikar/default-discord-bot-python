@@ -10,6 +10,7 @@ class Config:
     command_prefix: str
     bot_channel_id: int
     db: Optional[Dict]
+    reconnect_timeout: float
     pics_categories: Optional[Dict]
 
     def __init__(self, config_path: str, logger: Logger, formatter: Formatter): ...

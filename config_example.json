@@ -16,6 +16,7 @@
             "send_start": "12:00",
             "send_end": "00:00",
             "send_reserve_days": 30,
+            "send_archive_directory": "./pics/archive/cats",
             "suggestion_directory": "./pics/cats",
             "suggestion_channel_id": 1234567890,
             "suggestion_positive": "U+2705",
@@ -27,12 +28,14 @@
             "send_start": "12:00",
             "send_end": "00:00",
             "send_reserve_days": 30,
+            "send_archive_directory": "./pics/archive/nsfw",
             "suggestion_directory": "./pics/nsfw",
             "suggestion_channel_id": 1234567890,
             "suggestion_positive": "U+2705",
             "suggestion_negative": "U+274E"
         }
     },
+    "reconnect_timeout": 10,
     "logging_level": "INFO",
     "logging_file": "./launch.py.log"
 }

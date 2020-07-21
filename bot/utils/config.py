@@ -149,6 +149,25 @@ class Config:
             db = self._check_db(db)
         self.db = db
 
+        #  RECONNECT_TIMEOUT
+        reconnect_timeout = config.get('reconnect_timeout')
+        if not (reconnect_timeout is None
+                or isinstance(reconnect_timeout, (float, int))):
+            msg = ('Parameter `reconnect_timeout` '
+                   'is not an integer or float type.')
+            logger.critical(self._log_prefix + msg)
+            raise TypeError(msg)
+        if not (reconnect_timeout is None or reconnect_timeout >= 0):
+            msg = 'Parameter `reconnect_timeout` must be non-negative.'
+            logger.critical(self._log_prefix + msg)
+            raise ValueError(msg)
+        if reconnect_timeout is None:
+            logger.info(
+                self._log_prefix +
+                'Parameter `reconnect_timeout` is set to "10" by default.')
+            reconnect_timeout = 10
+        self.reconnect_timeout = reconnect_timeout
+
         #  PICS_CATEGORIES
         pics_categories = config.get('pics_categories')
         if not (pics_categories is None
