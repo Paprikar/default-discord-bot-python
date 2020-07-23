@@ -164,8 +164,8 @@ class Config:
         if reconnect_timeout is None:
             logger.info(
                 self._log_prefix +
-                'Parameter `reconnect_timeout` is set to "10" by default.')
-            reconnect_timeout = 10
+                'Parameter `reconnect_timeout` is set to "60" by default.')
+            reconnect_timeout = 60
         self.reconnect_timeout = reconnect_timeout
 
         #  PICS_CATEGORIES
