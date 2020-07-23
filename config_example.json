@@ -35,7 +35,7 @@
             "suggestion_negative": "U+274E"
         }
     },
-    "reconnect_timeout": 10,
+    "reconnect_timeout": 60,
     "logging_level": "INFO",
     "logging_file": "./launch.py.log"
 }
