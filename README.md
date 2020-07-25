@@ -299,4 +299,4 @@ For the bot to react to commands, a prefix must be provided in front of them.
 
 ## License
 
-default-discord-bot is licensed using the MIT License, as found in the LICENSE file.
+default-discord-bot is licensed using the MIT License, as found in the [LICENSE](LICENSE) file.
