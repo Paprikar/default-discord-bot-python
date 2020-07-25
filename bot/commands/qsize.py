@@ -8,12 +8,12 @@ async def message_qsize(message, args_str, bot):
                        if 'PicsSendingModule' in v['modules']}
     category_names = set()
     args = args_str.split()
-    if not args or 'all' in args:
-        category_names.update(pics_categories.keys())
-    else:
+    if args:
         for category_name in args:
             if category_name in pics_categories:
                 category_names.add(category_name)
+    else:
+        category_names.update(pics_categories.keys())
     if not category_names:
         return
     category_names = sorted(category_names)

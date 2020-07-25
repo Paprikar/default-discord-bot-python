@@ -218,8 +218,8 @@ class Config:
             logger.critical(self._log_prefix + msg)
             raise TypeError(msg)
         # clearing the extra keys
-        db = {k: db[k] for k
-              in ('dbname', 'host', 'port', 'user', 'password')}
+        db = {k: db[k] for k in db.keys()
+              if k in ('dbname', 'host', 'port', 'user', 'password')}
         # test connection
         try:
             conn = psycopg2.connect(**db)
@@ -235,11 +235,6 @@ class Config:
 
     def _check_pics_category(self, category, category_name):
         logger = self._logger
-        if not isinstance(category_name, str):
-            msg = (f'Key `pics_categories/{category_name}` '
-                   f'is not a string type.')
-            logger.critical(self._log_prefix + msg)
-            raise TypeError(msg)
         if not isinstance(category, dict):
             msg = (f'Value of `pics_categories/{category_name}` '
                    'is not a dict type.')
@@ -261,10 +256,11 @@ class Config:
                 'send_start',
                 'send_end',
                 'send_reserve_days'}
-        if category.keys() & keys:
+        optional_keys = {'send_archive_directory', }
+        if category.keys() & (keys | optional_keys):
             if not category.keys() >= keys:
                 msg = ('For the sending module to work, it is necessary '
-                       'that the value of `pics_categories/{category_name}` '
+                       f'that the value of `pics_categories/{category_name}` '
                        'must contain the following keys: ["send_directory", '
                        '"send_channel_id", "send_start", '
                        '"send_end", "send_reserve_days"].')
@@ -359,17 +355,16 @@ class Config:
     def _check_pics_suggestion_module(self, category, category_name):
         logger = self._logger
         keys = {'suggestion_directory',
-                'suggestion_channel_id',
-                'suggestion_positive',
-                'suggestion_negative'}
-        if category.keys() & keys:
+                'suggestion_channel_id'}
+        optional_keys = {'suggestion_positive',
+                         'suggestion_negative'}
+        if category.keys() & (keys | optional_keys):
             if not category.keys() >= keys:
                 msg = (
                     'For the suggestion module to work, it is necessary '
-                    'that the value of `pics_categories/{category_name}` '
+                    f'that the value of `pics_categories/{category_name}` '
                     'must contain the following keys: '
-                    '["suggestion_directory", "suggestion_channel_id", '
-                    '"suggestion_positive", "suggestion_negative"].')
+                    '["suggestion_directory", "suggestion_channel_id"].')
                 logger.critical(self._log_prefix + msg)
                 raise AssertionError(msg)
         else:
@@ -378,7 +373,7 @@ class Config:
         directory = category['suggestion_directory']
         if not isinstance(directory, str):
             msg = (f'Value of `pics_categories/{category_name}/'
-                   f'suggestion_directory` is not a string type.')
+                   'suggestion_directory` is not a string type.')
             logger.critical(self._log_prefix + msg)
             raise TypeError(msg)
         if not path.isdir(directory):
