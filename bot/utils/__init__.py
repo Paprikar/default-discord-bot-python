@@ -1,3 +1,5 @@
+"""Contains bot utilities."""
+
 from .config import Config
 from .logger import init_logger
 from .utils import get_pics_path_list

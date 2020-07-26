@@ -58,7 +58,7 @@ The configuration of the bot is performed by the `JSON` file.
 
 - bot_channel_id `Type: number`
 
-    The discord text channel ID in which the bot reacts to commands.
+    The discord text channel id in which the bot reacts to commands.
 
 - db `Type: object` `Optional`
 
@@ -115,21 +115,23 @@ The configuration of the bot is performed by the `JSON` file.
 
         Relates to the `PicsSendingModule`.
 
-        The discord text channel ID into which messages are sent.
+        The discord text channel id into which messages are sent.
 
     - send_start `Type: string`
 
         Relates to the `PicsSendingModule`.
 
-        Time to start sending messages in "HH:MM" format.
-        Where `HH` is an hour (24-hour clock) as a zero-padded decimal number and `MM` is a minute as a zero-padded decimal number.
+        Time for starting sending messages in "HH:MM" format.
+        Where `HH` is an hour (24-hour clock) as a zero-padded decimal number in range `0 <= hour < 24`
+        and `MM` is a minute as a zero-padded decimal number in range `0 <= minute < 60`.
 
     - send_end `Type: string`
 
         Relates to the `PicsSendingModule`.
 
-        Time to end sending messages in "HH:MM" format.
-        Where `HH` is an hour (24-hour clock) as a zero-padded decimal number and `MM` is a minute as a zero-padded decimal number.
+        Time for ending sending messages in "HH:MM" format.
+        Where `HH` is an hour (24-hour clock) as a zero-padded decimal number in range `0 <= hour < 24`
+        and `MM` is a minute as a zero-padded decimal number in range `0 <= minute < 60`.
 
     - send_reserve_days `Type: number`
 
@@ -154,7 +156,7 @@ The configuration of the bot is performed by the `JSON` file.
 
         Relates to the `PicsSuggestionModule`.
 
-        The discord text channel ID into which messages will be sent to prove images attached to them.
+        The discord text channel id into which messages will be sent to prove images attached to them.
 
     - suggestion_positive `Type: string` `Optional`
 

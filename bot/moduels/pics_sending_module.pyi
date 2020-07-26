@@ -11,11 +11,27 @@ from .module import Module
 
 
 class PicsSendingModule(Module):
+    """A module for sending images to discord text channels.
+
+    Attributes:
+        tasks: All tasks related to the current module.
+        monitoring_events: Events of locating new files on disk
+            for each category.
+        last_send_datetime: Planned or happened time of the last sending
+            for each category.
+
+    """
+
     tasks: Dict[Task, Optional[Event]]
     monitoring_events: Dict[str, Event]
     last_send_datetime: Dict[str, Optional[datetime]]
 
-    def __init__(self, bot: DiscordBot): ...
+    def __init__(self, bot: DiscordBot):
+        """
+        Args:
+            bot: Bot's object.
+
+        """
 
     async def _start(self, category_name: str): ...
 

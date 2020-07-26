@@ -1,6 +1,13 @@
 from discord import Message
 
-from bot.bot import DiscordBot
 
+async def ping(message: Message):
+    """The ``ping`` command.
 
-async def message_ping(message: Message, args_str: str, bot: DiscordBot): ...
+    Sends the answer "...pong" to the same text channel.
+    Used to check if the bot is online.
+
+    Args:
+        message: Message to be used.
+
+    """

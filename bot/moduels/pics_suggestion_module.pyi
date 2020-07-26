@@ -14,13 +14,29 @@ from .module import Module
 
 
 class PicsSuggestionModule(Module):
+    """A module for processing image suggestions.
+
+    Attributes:
+        categories: List of active categories for this module.
+        suggestion_info: Contains the required information by channel id.
+        server: The ``Server`` object.
+        server_runner: The ``ServerRunner`` object.
+        site: ``TCPSite`` object for receiving POST requests.
+
+    """
+
     categories: Set[str]
     suggestion_info: Dict[int, Tuple[str, str, str]]
     server: Server
     server_runner: ServerRunner
     site: TCPSite
 
-    def __init__(self, bot: DiscordBot): ...
+    def __init__(self, bot: DiscordBot):
+        """
+        Args:
+            bot: Bot's object.
+
+        """
 
     async def _start(self): ...
 

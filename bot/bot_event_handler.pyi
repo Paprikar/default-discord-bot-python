@@ -30,11 +30,35 @@ from .bot import DiscordBot
 
 
 class DiscordBotEventHandler:
+    """Class for determining bot's events.
+
+    For more information, check the website with
+    `documentation`_ for the discord bot events.
+
+    Attributes:
+        bot: Bot's object.
+
+    .. _documentation:
+        https://discordpy.readthedocs.io/en/latest/api.html#event-reference
+
+    """
+
     bot: DiscordBot
 
-    def __init__(self, bot: DiscordBot): ...
+    def __init__(self, bot: DiscordBot):
+        """
+        Args:
+            bot: Bot's object.
 
-    def update_event(self, event: Coroutine): ...
+        """
+
+    def update_event(self, event: Coroutine):
+        """Updates the bot's event.
+
+        Args:
+            event: An event to update.
+
+        """
 
     async def on_connect(self): ...
 

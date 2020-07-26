@@ -1,3 +1,5 @@
+"""Contains functionality for bot modules."""
+
 from .module import Module
 from .pics_sending_module import PicsSendingModule
 from .pics_suggestion_module import PicsSuggestionModule
