@@ -1,8 +1,9 @@
 import asyncio
-import os
 from datetime import datetime
 from datetime import timedelta
 from os import path
+from os import remove
+from os import rename
 
 import discord
 
@@ -313,7 +314,7 @@ class PicsSendingModule(Module):
 
         if archive_directory is None:
             try:
-                os.remove(pic_path)
+                remove(pic_path)
             except OSError as e:
                 self.bot.logger.error(
                     self._log_prefix +
@@ -322,7 +323,7 @@ class PicsSendingModule(Module):
         else:
             try:
                 dst = path.join(archive_directory, path.basename(pic_path))
-                os.rename(pic_path, dst)
+                rename(pic_path, dst)
             except OSError as e:
                 self.bot.logger.error(
                     self._log_prefix +

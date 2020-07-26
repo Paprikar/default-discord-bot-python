@@ -1,5 +1,10 @@
 # default-discord-bot
 
+![Python](https://img.shields.io/badge/python-3.7%20%7C%203.8-blue)
+![Platform](https://img.shields.io/badge/platform-windows%20%7C%20linux-lightgrey)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Paprikar/default-discord-bot.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Paprikar/default-discord-bot/context:python)
+[![GitHub License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 Discord bot aimed at working with media content written on Python.
 
 - [Installation](#installation)
@@ -15,7 +20,7 @@ Discord bot aimed at working with media content written on Python.
 
 ## Installation
 
-Requires Python version 3.5 or higher.
+Requires Python 3.7 or never.
 
 ### Dependencies installation
 

@@ -4,8 +4,8 @@ from datetime import datetime
 from datetime import timezone
 
 import aiofiles
-import aiohttp
 import discord
+from aiohttp import ClientSession
 from aiohttp import web
 
 from .module import Module
@@ -176,7 +176,7 @@ class PicsSuggestionModule(Module):
         path = None
 
         try:
-            async with aiohttp.ClientSession() as session:
+            async with ClientSession() as session:
                 async with session.get(url) as response:
                     if response.status != 200:
                         self.bot.logger.error(
