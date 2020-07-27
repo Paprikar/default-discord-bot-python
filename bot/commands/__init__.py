@@ -1,14 +1,16 @@
+"""Contains command functionality for discord text channels."""
+
 from .message_bot_channel import message_bot_channel
-from .ping import message_ping
-from .qsize import message_qsize
-from .restart import message_restart
-from .shutdown import message_shutdown
+from .ping import ping
+from .qsize import qsize
+from .restart import restart
+from .shutdown import shutdown
 
 
 __all__ = [
     'message_bot_channel',
-    'message_ping',
-    'message_qsize',
-    'message_restart',
-    'message_shutdown',
+    'ping',
+    'qsize',
+    'restart',
+    'shutdown',
 ]

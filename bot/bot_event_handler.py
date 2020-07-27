@@ -57,7 +57,7 @@ class DiscordBotEventHandler:
     async def on_message(self, message):
         await self.bot.client.wait_until_ready()
 
-        if message.channel.id == self.bot.bot_channel_id:
+        if message.channel.id == self.bot.config.bot_channel_id:
             await message_bot_channel(message, self.bot)
 
     async def on_message_delete(self, message):

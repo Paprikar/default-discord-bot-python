@@ -2,34 +2,40 @@
     "token": "TOKEN",
     "command_prefix": "!",
     "bot_channel_id": 1234567890,
+    "db": {
+        "dbname": "default-discord-bot",
+        "user": "postgres",
+        "password": "password",
+        "host": "localhost",
+        "port": 5432
+    },
     "pics_categories": {
         "cats": {
+            "send_directory": "./pics/cats",
             "send_channel_id": 1234567890,
+            "send_start": "12:00",
+            "send_end": "00:00",
+            "send_reserve_days": 30,
+            "send_archive_directory": "./pics/archive/cats",
+            "suggestion_directory": "./pics/cats",
             "suggestion_channel_id": 1234567890,
             "suggestion_positive": "U+2705",
-            "suggestion_negative": "U+274E",
-            "directory": "./pics/cats",
-            "send_time": [
-                "16:00",
-                "17:00",
-                "18:00",
-                "19:00"
-            ]
+            "suggestion_negative": "U+274E"
         },
         "nsfw": {
+            "send_directory": "./pics/nsfw",
             "send_channel_id": 1234567890,
+            "send_start": "12:00",
+            "send_end": "00:00",
+            "send_reserve_days": 30,
+            "send_archive_directory": "./pics/archive/nsfw",
+            "suggestion_directory": "./pics/nsfw",
             "suggestion_channel_id": 1234567890,
             "suggestion_positive": "U+2705",
-            "suggestion_negative": "U+274E",
-            "directory": "./pics/nsfw",
-            "send_time": [
-                "16:00",
-                "17:00",
-                "18:00",
-                "19:00"
-            ]
+            "suggestion_negative": "U+274E"
         }
     },
+    "reconnect_timeout": 60,
     "logging_level": "INFO",
     "logging_file": "./launch.py.log"
 }

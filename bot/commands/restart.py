@@ -1,4 +1,4 @@
-async def message_restart(message, args_str, bot):
+async def restart(message, args_str, bot):
     if message.author.guild_permissions.administrator:
         if args_str:
             try:

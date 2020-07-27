@@ -1,3 +1,5 @@
+"""Contains high-level bot functionality."""
+
 from .bot import DiscordBot
 from .bot_event_handler import DiscordBotEventHandler
 

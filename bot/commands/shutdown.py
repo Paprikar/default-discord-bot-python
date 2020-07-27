@@ -1,4 +1,4 @@
-async def message_shutdown(message, args_str, bot):
+async def shutdown(message, args_str, bot):
     if message.author.guild_permissions.administrator:
         if args_str:
             try:
