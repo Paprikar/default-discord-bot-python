@@ -20,12 +20,12 @@ Discord bot aimed at working with media content written on Python.
 
 ## Installation
 
-Requires Python 3.7 or never.
+Requires Python 3.7 or newer.
 
 ### Dependencies installation
 
 ```
-pip install aiofiles==0.5.0 aiohttp==3.6.2 discord.py==1.3.4
+pip install aiofiles==0.5.0 aiohttp==3.6.2 discord.py==1.3.4 watchdog==0.10.3
 ```
 or
 ```

@@ -6,6 +6,9 @@ from os import remove
 from os import rename
 
 import discord
+from watchdog.events import FileCreatedEvent
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 from bot.utils.utils import get_pics_path_list
 from bot.utils.utils import time_in_range
@@ -18,7 +21,7 @@ class PicsSendingModule(Module):
         self._log_prefix = f'{type(self).__name__}: '
 
         self.bot = bot
-        self.to_close = asyncio.Lock()
+        self.to_close = asyncio.Event()
         self.tasks = {}
         self.monitoring_events = {}
         self.last_send_datetime = {}
@@ -30,7 +33,7 @@ class PicsSendingModule(Module):
                 continue
 
             monitoring_task = self.bot.loop.create_task(
-                self._start_monitoring(category_name, 60))
+                self._start_monitoring(category_name))
             self.tasks[monitoring_task] = None
             self.monitoring_events[category_name] = asyncio.Event()
 
@@ -45,7 +48,7 @@ class PicsSendingModule(Module):
         try:
             idle_event = self.tasks[asyncio.current_task()]
 
-            while not (self.bot.client.is_closed() or self.to_close.locked()):
+            while not (self.bot.client.is_closed() or self.to_close.is_set()):
                 await self.bot.client.wait_until_ready()
                 permit, cooldown = await self._time_check(category_name)
                 await asyncio.sleep(cooldown)
@@ -59,28 +62,36 @@ class PicsSendingModule(Module):
                         except Exception as e:
                             self.bot.logger.error(
                                 self._log_prefix +
-                                f'Caught an exception of type '
+                                'Caught an exception of type '
                                 f'`{type(e).__name__}` '
                                 f'while setting a value in the database: {e}')
                     idle_event.set()
         except asyncio.CancelledError:
             pass
 
-    async def _start_monitoring(self, category_name, refresh_time=60):
+    async def _start_monitoring(self, category_name):
+        observer = None
+
         try:
             category = self.bot.config.pics_categories[category_name]
             directory = category['send_directory']
-            prev_set = set()
 
-            while not (self.bot.client.is_closed() or self.to_close.locked()):
-                curr_set = set(get_pics_path_list(directory))
-                if curr_set - prev_set:
-                    self.monitoring_events[category_name].set()
-                    self.monitoring_events[category_name].clear()
-                prev_set = curr_set
-                await asyncio.sleep(refresh_time)
+            event_handler = _FileSystemEventHandler(
+                directory,
+                self.monitoring_events[category_name],
+                self.bot.loop)
+
+            observer = Observer()
+            observer.schedule(event_handler, directory)
+            observer.start()
+
+            await self.to_close.wait()
+            observer.stop()
+            observer.join()
         except asyncio.CancelledError:
-            pass
+            if observer is not None and observer.is_alive():
+                observer.stop()
+                observer.join()
 
     async def _time_check(self, category_name):
         #  Returns: permit, cooldown
@@ -346,7 +357,7 @@ class PicsSendingModule(Module):
 
     async def _close(self, timeout=None):
         try:
-            await self.to_close.acquire()
+            self.to_close.set()
             await asyncio.wait_for(self._closer(), timeout)
         except asyncio.TimeoutError:
             self.bot.logger.error(
@@ -368,3 +379,25 @@ class PicsSendingModule(Module):
         if idle_event is not None:
             await idle_event.wait()
         task.cancel()
+
+
+class _FileSystemEventHandler(FileSystemEventHandler):
+
+    def __init__(self, directory, monitoring_event, loop):
+        self.directory = directory
+        self.monitoring_event = monitoring_event
+        self.loop = loop
+        self.prev_set = set()
+
+    def on_created(self, event):
+        if not isinstance(event, FileCreatedEvent):
+            return
+
+        curr_set = set(get_pics_path_list(self.directory))
+        if curr_set - self.prev_set:
+            self.loop.call_soon_threadsafe(self._event)
+        self.prev_set = curr_set
+
+    def _event(self):
+        self.monitoring_event.set()
+        self.monitoring_event.clear()

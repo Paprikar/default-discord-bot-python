@@ -17,7 +17,7 @@ class PicsSuggestionModule(Module):
         self._log_prefix = f'{type(self).__name__}: '
 
         self.bot = bot
-        self.to_close = asyncio.Lock()
+        self.to_close = asyncio.Event()
 
         categories_data = self.bot.config.pics_categories
         self.categories = {
@@ -47,7 +47,7 @@ class PicsSuggestionModule(Module):
 
     async def _close(self, timeout):
         try:
-            await self.to_close.acquire()
+            self.to_close.set()
             await asyncio.wait_for(self._closer(timeout), timeout)
         except asyncio.TimeoutError:
             self.bot.logger.warning(
@@ -63,7 +63,7 @@ class PicsSuggestionModule(Module):
 
     async def _request_handler(self, request):
         try:
-            if self.to_close.locked():
+            if self.to_close.is_set():
                 msg = 'Suggestion service unavailable.'
                 self.bot.logger.warning(self._log_prefix + msg)
                 return web.Response(status=500, text=msg)
@@ -122,7 +122,7 @@ class PicsSuggestionModule(Module):
             return web.Response(status=500, text=msg)
 
     async def reaction_handler(self, payload):
-        if self.to_close.locked():
+        if self.to_close.is_set():
             self.bot.logger.warning(
                 self._log_prefix +
                 'Ignoring the reaction event: '
