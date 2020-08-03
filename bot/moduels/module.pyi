@@ -1,4 +1,4 @@
-from asyncio import Lock
+from asyncio import Event
 from asyncio import Task
 from typing import Optional
 
@@ -10,13 +10,13 @@ class Module:
 
     Attributes:
          bot: Bot's object.
-         to_close: The lock for switching the module to the shutdown mode.
+         to_close: The event for switching the module to the shutdown mode.
          close_task: The task responsible for shutting down the module.
 
     """
 
     bot: DiscordBot
-    to_close: Lock
+    to_close: Event
     close_task: Task
 
     def run(self):
