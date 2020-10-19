@@ -46,12 +46,15 @@ class DiscordBot:
 
     _client_runner_task: Optional[Task]
 
-    def __init__(self, config_path: str, logger: Logger, formatter: Formatter):
+    def __init__(self, config_path: str, logger: Optional[Logger], formatter: Optional[Formatter]):
         """
         Args:
             config_path: The path to the json configuration file.
-            logger: Logger's object.
-            formatter: Formatter's object.
+            logger: Logger's object. By default creates a ``Logger``
+                with the name of the variable ``__file__``.
+            formatter: Formatter's object. By default creates a ``Formatter``
+                with the following format:
+                `"[%(datetime)s][%(threadName)s][%(name)s]: %(message)s"`.
 
         """
 

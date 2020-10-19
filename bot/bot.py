@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import sys
 
 import discord
@@ -7,16 +8,23 @@ from .bot_event_handler import DiscordBotEventHandler
 from .moduels import PicsSendingModule
 from .moduels import PicsSuggestionModule
 from .utils import Config
+from .utils import init_logger
 
 
 class DiscordBot:
 
-    def __init__(self, config_path, logger, formatter):
+    def __init__(self, config_path, logger=None, formatter=None):
         self._log_prefix = f'{type(self).__name__}: '
 
         self.config_path = config_path
-        self.logger = logger
-        self.formatter = formatter
+        self.formatter = (
+            logging.Formatter(
+                '[%(datetime)s][%(threadName)s][%(name)s]'
+                '[%(levelname)s]: %(message)s')
+            if formatter is None
+            else formatter)
+        self.logger = (init_logger(__file__, formatter) if logger is None
+                       else logger)
 
         self._client_runner_task = None
 
