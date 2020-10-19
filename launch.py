@@ -1,19 +1,13 @@
 import argparse
-import logging
 import os
 
 from bot import DiscordBot
-from bot.utils import init_logger
 
 
 def run(config_path, no_chdir=False):
     if not no_chdir:
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    formatter = logging.Formatter(
-        '[%(datetime)s][%(threadName)s][%(name)s]'
-        '[%(levelname)s]: %(message)s')
-    logger = init_logger(__file__, formatter)
-    bot = DiscordBot(config_path, logger, formatter)
+    bot = DiscordBot(config_path)
     bot.run()
 
 

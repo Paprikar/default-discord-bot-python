@@ -187,7 +187,7 @@ class PicsSuggestionModule(Module):
                             f'"{await response.text()}".')
                         return False
                     now = datetime.now(timezone.utc).timestamp() * 1000
-                    ext = os.path.splitext(url)[1]
+                    ext = os.path.splitext(url)[1].split('?')[0]
                     if ext.lower() not in ('.png', '.jpg', '.jpeg'):
                         self.bot.logger.error(
                             self._log_prefix +

@@ -5,7 +5,7 @@
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Paprikar/default-discord-bot.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Paprikar/default-discord-bot/context:python)
 [![GitHub License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-Discord bot aimed at working with media content written on Python.
+Discord bot aimed at working with media content written in Python.
 
 - [Installation](#installation)
   - [Dependencies installation](#dependencies-installation)
@@ -213,28 +213,14 @@ python launch.py --help
 
 ### Advanced
 
-The bot needs the path to the configuration file, the logger object and the formatter object to be launched.
-
-```python
-import logging
-
-from bot.utils import init_logger
-
-
-config = 'config.json'
-formatter = logging.Formatter(
-    '[%(datetime)s][%(threadName)s][%(name)s]'
-    '[%(levelname)s]: %(message)s')
-logger = init_logger(__file__, formatter)
-```
-
+The bot needs the path to the configuration file to be launched.
 Then create an object of `DiscordBot` type and execute its `run` method.
 
 ```python
 from bot import DiscordBot
 
-
-bot = DiscordBot(config, logger, formatter)
+config_path = 'config.json'
+bot = DiscordBot(config_path)
 bot.run()
 ```
 
