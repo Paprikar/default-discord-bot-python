@@ -97,7 +97,7 @@ class DiscordBot:
                         'Caught an exception of type `discord.LoginFailure` '
                         f'while authorizing the bot\'s client: {e}')
                     self.shutdown_allowed = True
-                    self.stop()
+                    self.stop('Shutting down.')
                     break
                 except Exception as e:
                     timeout = self.config.reconnect_timeout
@@ -105,11 +105,10 @@ class DiscordBot:
                         self._log_prefix +
                         f'Caught an exception of type `{type(e).__name__}` '
                         f'while launching the bot\'s client: {e}')
-                    self.logger.info(f'Reconnection after {timeout} seconds.')
-                    await self.client.close()
-                    self.client = discord.Client(loop=self.loop)
-                    self.event_handler = DiscordBotEventHandler(self)
+                    self.logger.info(f'Restarting after {timeout} seconds.')
                     await asyncio.sleep(timeout)
+                    self.stop('Restarting.')
+                    break
         except asyncio.CancelledError:
             pass
 
@@ -129,7 +128,8 @@ class DiscordBot:
 
         tasks = [t for t in asyncio.all_tasks()
                  if t is not asyncio.current_task()]
-        await asyncio.gather(*tasks)
+        if timeout is not None and timeout != 0:
+            await asyncio.gather(*tasks)
         self.loop.stop()
 
     def get_module(self, module_type):
