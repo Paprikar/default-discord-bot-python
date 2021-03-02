@@ -25,7 +25,7 @@ Requires Python 3.7 or newer.
 ### Dependencies installation
 
 ```
-pip install aiofiles==0.5.0 aiohttp==3.6.2 discord.py==1.3.4 watchdog==0.10.3
+pip install aiofiles==0.6.0 aiohttp==3.7.4 discord.py==1.6.0 watchdog==2.0.2
 ```
 or
 ```
