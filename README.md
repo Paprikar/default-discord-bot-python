@@ -2,7 +2,8 @@
 
 ![Python](https://img.shields.io/badge/python-3.7%20%7C%203.8-blue)
 ![Platform](https://img.shields.io/badge/platform-windows%20%7C%20linux-lightgrey)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Paprikar/default-discord-bot.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Paprikar/default-discord-bot/context:python)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/Paprikar/default-discord-bot-python.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Paprikar/default-discord-bot-python/alerts/)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Paprikar/default-discord-bot-python.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Paprikar/default-discord-bot-python/context:python)
 [![GitHub License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 Discord bot aimed at working with media content written in Python.
@@ -39,7 +40,7 @@ pip install -r requirements.txt
 For more stable bot operation the PostgreSQL database adapter is used.
 
 ```
-pip install psycopg2==2.8.5
+pip install psycopg2==2.8.6
 ```
 
 ## Configuration
