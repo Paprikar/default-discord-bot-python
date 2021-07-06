@@ -108,11 +108,13 @@ class PicsSuggestionModule(Module):
                 await message.add_reaction(positive)
                 await message.add_reaction(negative)
             except (discord.HTTPException, discord.InvalidArgument) as e:
-                msg = ('Caught an exception of type '
+                msg_log = ('Caught an exception of type '
                        f'`discord.{type(e).__name__}` '
                        f'while sending the suggestion: {e}')
-                self.bot.logger.error(self._log_prefix + msg)
-                return web.Response(status=500, text=msg)
+                self.bot.logger.error(self._log_prefix + msg_log)
+                msg_response = ('An internal error occurred '
+                                'while sending the suggestion.')
+                return web.Response(status=500, text=msg_response)
 
             return web.Response(text='OK')
 

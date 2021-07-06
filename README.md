@@ -26,7 +26,7 @@ Requires Python 3.7 or newer.
 ### Dependencies installation
 
 ```
-pip install aiofiles==0.6.0 aiohttp==3.7.4 discord.py==1.6.0 watchdog==2.0.2
+pip install aiofiles==0.7.0 aiohttp==3.7.4 discord.py==1.7.3 watchdog==2.1.3
 ```
 or
 ```
@@ -40,7 +40,7 @@ pip install -r requirements.txt
 For more stable bot operation the PostgreSQL database adapter is used.
 
 ```
-pip install psycopg2==2.8.6
+pip install psycopg2==2.9.1
 ```
 
 ## Configuration
