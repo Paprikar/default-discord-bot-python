@@ -88,8 +88,14 @@ class PicsSuggestionModule(Module):
                     self._log_prefix +
                     'The POST request was received '
                     'with invalid timeout parameter.')
-
-            await self.bot.client.wait_until_ready()
+            try:
+                await asyncio.wait_for(
+                    self.bot.client.wait_until_ready(), timeout)
+            except asyncio.TimeoutError:
+                msg = ('The bot is not ready to process '
+                       'the request at this time.')
+                self.bot.logger.warning(self._log_prefix + msg)
+                return web.Response(status=500, text=msg)
 
             category_data = self.bot.config.pics_categories[category]
             channel = self.bot.client.get_channel(
