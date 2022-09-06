@@ -10,6 +10,7 @@ class DiscordBotEventHandler:
         self._log_prefix = f'{type(self).__name__}: '
 
         self.bot = bot
+        self.isModulesStarted = False
 
         methods = inspect.getmembers(self, inspect.ismethod)
         events = (method[1] for method in methods
@@ -36,6 +37,11 @@ class DiscordBotEventHandler:
             msg += f'\n  {guild.name} (id: {guild.id})'
         self.bot.logger.info(self._log_prefix + msg)
 
+        if not self.isModulesStarted:
+            self.isModulesStarted = True
+            for module in self.bot.modules:
+                module.run()
+
     async def on_shard_ready(self, shard_id):
         pass
 
@@ -55,8 +61,6 @@ class DiscordBotEventHandler:
         pass
 
     async def on_message(self, message):
-        await self.bot.client.wait_until_ready()
-
         if message.channel.id == self.bot.config.bot_channel_id:
             await message_bot_channel(message, self.bot)
 

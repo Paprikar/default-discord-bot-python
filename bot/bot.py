@@ -36,7 +36,8 @@ class DiscordBot:
         self.config = Config(self.config_path, self.logger, self.formatter)
 
         self.loop = asyncio.get_event_loop()
-        self.client = discord.Client(loop=self.loop)
+        intents = discord.Intents.default()
+        self.client = discord.Client(intents=intents, loop=self.loop)
 
         self.shutdown_allowed = False
         self.event_handler = DiscordBotEventHandler(self)
@@ -65,11 +66,9 @@ class DiscordBot:
             if self.config.pics_categories:
                 module = PicsSendingModule(self)
                 self.modules.append(module)
-                module.run()
 
                 module = PicsSuggestionModule(self)
                 self.modules.append(module)
-                module.run()
 
             self._client_runner_task = self.loop.create_task(
                 self._client_runner())

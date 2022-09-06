@@ -141,7 +141,7 @@ class PicsSendingModule(Module):
             return (False, cooldown)
 
         if (self.last_send_datetime[category_name] is None and
-            self.bot.config.db is not None):
+                self.bot.config.db is not None):
             idle_event = self.tasks[asyncio.current_task()]
             idle_event.clear()
             try:

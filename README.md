@@ -1,6 +1,6 @@
 # default-discord-bot
 
-![Python](https://img.shields.io/badge/python-3.7%20%7C%203.8-blue)
+![Python](https://img.shields.io/badge/python-3.8+-blue)
 ![Platform](https://img.shields.io/badge/platform-windows%20%7C%20linux-lightgrey)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/Paprikar/default-discord-bot-python.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Paprikar/default-discord-bot-python/alerts/)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/Paprikar/default-discord-bot-python.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Paprikar/default-discord-bot-python/context:python)
@@ -21,12 +21,12 @@ Discord bot aimed at working with media content written in Python.
 
 ## Installation
 
-Requires Python 3.7 or newer.
+Requires Python 3.8 or newer.
 
 ### Dependencies installation
 
 ```
-pip install aiofiles==0.7.0 aiohttp==3.7.4 discord.py==1.7.3 watchdog==2.1.3
+pip install aiofiles==22.1.0 aiohttp==3.8.1 discord.py==2.0.1 watchdog==2.1.9
 ```
 or
 ```
@@ -40,7 +40,7 @@ pip install -r requirements.txt
 For more stable bot operation the PostgreSQL database adapter is used.
 
 ```
-pip install psycopg2==2.9.1
+pip install psycopg2==2.9.3
 ```
 
 ## Configuration

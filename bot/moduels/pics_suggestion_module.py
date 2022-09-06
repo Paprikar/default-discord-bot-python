@@ -76,7 +76,7 @@ class PicsSuggestionModule(Module):
             if (category is None or
                 link is None or
                 category not in self.categories or
-                not isinstance(link, str)):
+                    not isinstance(link, str)):
                 msg = 'POST request has invalid data.'
                 self.bot.logger.warning(self._log_prefix + msg)
                 return web.Response(status=400, text=msg)
@@ -88,14 +88,8 @@ class PicsSuggestionModule(Module):
                     self._log_prefix +
                     'The POST request was received '
                     'with invalid timeout parameter.')
-            try:
-                await asyncio.wait_for(
-                    self.bot.client.wait_until_ready(), timeout)
-            except asyncio.TimeoutError:
-                msg = ('The bot is not ready to process '
-                       'the request at this time.')
-                self.bot.logger.warning(self._log_prefix + msg)
-                return web.Response(status=500, text=msg)
+
+            await self.bot.client.wait_until_ready()
 
             category_data = self.bot.config.pics_categories[category]
             channel = self.bot.client.get_channel(
@@ -109,8 +103,8 @@ class PicsSuggestionModule(Module):
                 await message.add_reaction(negative)
             except (discord.HTTPException, discord.InvalidArgument) as e:
                 msg_log = ('Caught an exception of type '
-                       f'`discord.{type(e).__name__}` '
-                       f'while sending the suggestion: {e}')
+                           f'`discord.{type(e).__name__}` '
+                           f'while sending the suggestion: {e}')
                 self.bot.logger.error(self._log_prefix + msg_log)
                 msg_response = ('An internal error occurred '
                                 'while sending the suggestion.')
@@ -133,8 +127,6 @@ class PicsSuggestionModule(Module):
 
         if payload.user_id == self.bot.client.user.id:
             return  # Do not respond to bot actions
-
-        await self.bot.client.wait_until_ready()
 
         channel = self.bot.client.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
